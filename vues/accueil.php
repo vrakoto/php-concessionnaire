@@ -1,1 +1,1 @@
-<h1>Accueil</h1>
+<h1><?=  $_SESSION['id']  ?? 'Accueil' ?></h1>
