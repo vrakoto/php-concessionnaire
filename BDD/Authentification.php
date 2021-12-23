@@ -26,4 +26,34 @@ class Authentification {
 
         return !empty($p->fetchAll());
     }
+    
+    /**
+     * Retourne tous les véhicules (ou seulement par type si spécifié)
+     *
+     */
+    function getLesVehicules(string $typeVehic = NULL): array
+    {
+        switch ($typeVehic) {
+            case 'automobile':
+                $req = "SELECT * FROM vehicule WHERE type = 'automobile'";
+            break;
+
+            case 'deuxRoues':
+                $req = "SELECT * FROM vehicule WHERE type = 'deux roues'";
+            break;
+
+            case 'edpm':
+                $req = "SELECT * FROM vehicule WHERE type = 'edpm'";
+            break;
+            
+            default:
+                $req = "SELECT * FROM vehicule";
+            break;
+        }
+
+        $req .= " ORDER BY publication DESC";
+
+        $p = $this->pdo->query($req);
+        return $p->fetchAll();
+    }
 }

@@ -6,9 +6,9 @@ $element = $root . 'elements' . DIRECTORY_SEPARATOR;
 $vues = $root . 'vues' . DIRECTORY_SEPARATOR;
 $bdd = $root . 'bdd' . DIRECTORY_SEPARATOR;
 $fonctions = $root . 'fonctions' . DIRECTORY_SEPARATOR;
+
 require_once $bdd . 'Authentification.php';
 require_once $fonctions . 'helper.php';
-
 $pdo = new Authentification;
 require_once $element . 'header.php';
 
@@ -77,6 +77,17 @@ switch ($action) {
                 require_once $vues . 'inscription.php';
             }
         }
+    break;
+
+    case 'parcourir':
+        $nbVehics = (int)$pdo->getLesVehicules();
+        $nbAutomobile = (int)$pdo->getLesVehicules('automobile');
+        $nbDeuxRoues = (int)$pdo->getLesVehicules('deuxRoues');
+        $nbEDPM = (int)$pdo->getLesVehicules('edpm');
+
+        $type = htmlentities($_REQUEST['type']);
+        $lesVehicules = $pdo->getLesVehicules($type);
+        require_once $vues . 'parcourir.php';
     break;
 
     case 'deconnexion':

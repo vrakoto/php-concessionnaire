@@ -1,0 +1,11 @@
+.laRecherche .form-select {
+    cursor: pointer;
+}
+
+.laRecherche .form-select:not(:first-child) {
+    margin-left: 15px;
+}
+
+.laRecherche button {
+    margin-left: 15px;
+}
