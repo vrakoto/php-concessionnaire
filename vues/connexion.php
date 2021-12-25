@@ -7,7 +7,7 @@
 
     <div class="mb-4">
         <label for="id" class="form-label">Identifiant</label>
-        <input type="text" name="id" class="form-control" id="id" placeholder="Insérez votre identifiant">
+        <input type="text" name="id" class="form-control" id="id" placeholder="Insérez votre identifiant" autofocus>
     </div>
 
     <div class="mb-3">

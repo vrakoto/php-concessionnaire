@@ -2,10 +2,23 @@
     cursor: pointer;
 }
 
-.laRecherche .form-select:not(:first-child) {
+.laRecherche .form-select:not(:first-child), .laRecherche input {
     margin-left: 15px;
 }
 
 .laRecherche button {
     margin-left: 15px;
+}
+
+.leVehicule:hover {
+    cursor: pointer;
+    box-shadow: 10px 10px 10px 10px #333;
+}
+
+.vendre select {
+    margin-bottom: 20px;
+}
+
+#categorieDeuxRoues {
+    display: none;
 }

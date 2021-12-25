@@ -19,6 +19,17 @@ class Inscription extends Authentification {
         $this->mdp_confirm = $mdp_confirm;
     }
 
+    function identifiantExistant(string $id): bool
+    {
+        $req = "SELECT id FROM client WHERE id = :id";
+        $p = $this->pdo->prepare($req);
+        $p->execute([
+            'id' => $id
+        ]);
+
+        return !empty($p->fetch());
+    }
+
     function verifierInscription(): bool
     {
         return empty($this->getErreurs());
@@ -29,6 +40,10 @@ class Inscription extends Authentification {
         $erreurs = [];
         if (strlen($this->id) < 2) {
             $erreurs['id'] = "Identifiant trop court";
+        }
+
+        if ($this->identifiantExistant($this->id)) {
+            $erreurs['id'] = "Identifiant déjà prit";
         }
         
         if (strlen($this->nom) < 2) {

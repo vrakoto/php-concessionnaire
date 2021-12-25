@@ -39,4 +39,12 @@ function typeParcourir(string $type, string $icon, string $titre, int $nbVehic)
     <a href="index.php?action=parcourir&type=$type" class="$text btn border" ><i class="fas fa-$icon"></i> $titre ($nbVehic)</a>
 HTML;
 }
-?>
+
+function valOptionSub(string $varPHP, string $valeur): string
+{
+    $s = "";
+    if (isset($_REQUEST[$varPHP]) && $_REQUEST[$varPHP] === $valeur) {
+        $s = "selected";
+    }
+    return $s;
+}
