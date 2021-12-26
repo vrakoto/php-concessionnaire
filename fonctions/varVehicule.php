@@ -1,4 +1,6 @@
 <?php
+$id = htmlentities($vehicule['id']);
+$vendeur = htmlentities($vehicule['vendeur']);
 $image = htmlentities($vehicule['imagePrincipale']);
 $type = htmlentities($vehicule['type']);
 $marque = htmlentities($vehicule['marque']);

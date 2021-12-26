@@ -1,3 +1,7 @@
+.toggle {
+    display: block !important;
+}
+
 .laRecherche .form-select {
     cursor: pointer;
 }
@@ -8,6 +12,21 @@
 
 .laRecherche button {
     margin-left: 15px;
+}
+
+.leVehicule {
+    text-decoration: none;
+    color: #000;
+}
+
+.vehicule .imgVehic img {
+    width: 600px;
+    height: 100%;
+}
+
+.infos-vendeur p, .infos-vendeur a {
+    margin-top: 0;
+    margin-bottom: 0;
 }
 
 .leVehicule:hover {
@@ -22,3 +41,18 @@
 #categorieDeuxRoues {
     display: none;
 }
+
+
+.questionFrequentes {
+    display: none;
+}
+
+.questionFrequentes button {
+    margin-top: 20px;
+    width: 100%;
+}
+
+#contacter textarea {
+    height: 100px;
+}
+

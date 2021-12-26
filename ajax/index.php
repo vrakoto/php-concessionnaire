@@ -53,10 +53,15 @@ switch ($action) {
                 if ($type === 'deuxRoues') {
                     $type = 'Deux Roues';
                 }
+                $monVehicule = "";
+                if ($vendeur === $connexion) {
+                    $monVehicule = "Votre véhicule";
+                }
                 echo <<<HTML
-                <div class="leVehicule d-flex flex-row card w-100 mb-5">
+                <a href="index.php?action=vehicule&id=$id" class="leVehicule d-flex flex-row card w-100 mb-5">
                     <img class="img-fluid" src="$image" width="250" alt="Image du véhicule">
                     <div class="card-body">
+                        <p class="text-success">$monVehicule</p>
                         <h4 class="card-title">$type</h4>
                         <h6 class="mt-3 mb-0">$marque $modele</h6>
                         <i>$region</i>
@@ -68,7 +73,7 @@ switch ($action) {
                         <span>$energie | </span>
                         <span>$transmission</span>
                     </div>
-                </div>
+                </a>
 HTML;
             }
         } catch (PDOException $error) {

@@ -29,6 +29,17 @@ class Authentification {
         return !empty($p->fetchAll());
     }
 
+    function getUtilisateur(string $idUtilisateur): array
+    {
+        $req = "SELECT avatar, nom, prenom, ville  FROM client WHERE id = :id";
+        $p = $this->pdo->prepare($req);
+        $p->execute([
+            'id' => $idUtilisateur
+        ]);
+
+        return $p->fetch();
+    }
+
     function getLesTypes(): array
     {
         $req = "SELECT id FROM type";
@@ -129,6 +140,30 @@ class Authentification {
         return $p->fetchAll();
     }
 
+    function getLeVehicule(string $idVehic): array
+    {
+        $req = "SELECT * FROM vehicule WHERE id = :id";
+        $p = $this->pdo->prepare($req);
+        $p->execute([
+            'id' => $idVehic
+        ]);
+
+        return $p->fetch();
+    }
+
+    function getVehiculesUtilisateur(string $idUtilisateur): array
+    {
+        $req = "SELECT * FROM vehicule v
+                WHERE vendeur = (SELECT id FROM client WHERE id = :idUtilisateur)
+                ORDER BY publication DESC";
+        $p = $this->pdo->prepare($req);
+        $p->execute([
+            'idUtilisateur' => $idUtilisateur
+        ]);
+
+        return $p->fetchAll();
+    }
+
     function rechercherVehicule(array $champs): array
     {
         $searchNotNull = [];
@@ -139,9 +174,47 @@ class Authentification {
                 $req .= " AND $champ = :$champ";
             }
         }
+        $req .= " ORDER BY publication DESC";
         
         $p = $this->pdo->prepare($req);
         $p->execute($searchNotNull);
         return $p->fetchAll();
     }
+
+    function supprimerVehicule(string $idVehicule): bool
+    {
+        $req = "DELETE FROM vehicule WHERE id = :idVehicule AND vendeur = :idVendeur";
+        $p = $this->pdo->prepare($req);
+        return $p->execute([
+            'idVehicule' => $idVehicule,
+            'idVendeur' => $_SESSION['id']
+        ]);
+    }
+
+
+    function getConversation(string $idUtilisateur): array
+    {
+        $req = "SELECT * FROM message WHERE (idClient = :idClient AND idVendeur = :idVendeur) OR (idClient = :idVendeur AND idVendeur = :idClient) ORDER BY date DESC";
+        $p = $this->pdo->prepare($req);
+        $p->execute([
+            'idClient' => $_SESSION['id'],
+            'idVendeur' => $idUtilisateur,
+        ]);
+
+        return $p->fetchAll();
+    }
+    
+    
+    function envoyerMessage(string $idVehic, string $vendeur, string $message): bool
+    {
+        $req = "INSERT INTO message (idVehicule, idClient, idVendeur, message) VALUES (:idVehicule, :idClient, :idVendeur, :message)";
+        $p = $this->pdo->prepare($req);
+        return $p->execute([
+            'idVehicule' => $idVehic,
+            'idClient' => $_SESSION['id'],
+            'idVendeur' => $vendeur,
+            'message' => $message
+        ]);
+    }
+
 }

@@ -146,6 +146,67 @@ switch ($action) {
         }
     break;
 
+    // Consulter un véhicule
+    case 'vehicule':
+        $idVehic = htmlentities($_REQUEST['id']);
+        $vehicule = $pdo->getLeVehicule($idVehic);
+        require_once $fonctions . 'varVehicule.php';
+        $avatar = $pdo->getUtilisateur($vendeur)['avatar'];
+
+        if (isset($_POST['message'])) {
+            $vendeur = htmlentities($_REQUEST['leVendeur']);
+            $message = htmlentities($_POST['message']);
+    
+            if (empty($pdo->getUtilisateur($vendeur))) {
+                die(header('HTTP/1.1 404 Vendeur introuvable'));
+            }
+    
+            if (empty(trim($message))) {
+                die(header('HTTP/1.1 404 Message vide'));
+            }
+    
+            try {
+                $pdo->envoyerMessage($idVehic, $vendeur, $message);
+                header('Location:index.php?action=vehicule&id=' . $idVehic);
+                exit();
+            } catch (PDOException $error) {
+                throw $error->getMessage();
+            }
+        }
+
+        $convExistante = !empty($pdo->getConversation($vendeur));
+        require_once $vues . 'vehicule.php';
+    break;
+
+    case 'vente':
+        $idUtilisateur = htmlentities($_REQUEST['id']);
+
+        try {
+            $pdo->getUtilisateur($idUtilisateur);
+        } catch (\Throwable $th) {
+            echo "<div class='container alert alert-danger text-center'>Utilisateur inexistant <br/><a href='index.php?action=accueil'>Revenir à la page d'accueil</a></div>";
+            exit();
+        }
+
+        $lesVentes = $pdo->getVehiculesUtilisateur($idUtilisateur);
+        if ($connexion === $idUtilisateur) {
+            $lesVentes = $pdo->getVehiculesUtilisateur($connexion);
+        }
+        require_once $vues . 'ventes.php';
+    break;
+
+    case 'supprimerVehicule':
+        $idVehic = htmlentities($_REQUEST['id']);
+        try {
+            $pdo->supprimerVehicule($idVehic);
+            header('Location:index.php?action=vente&id=' . $connexion);
+            exit();
+        } catch (\Throwable $th) {
+            echo "<div class='container alert alert-danger text-center'>Erreur 404 <br/><a href='index.php?action=accueil'>Revenir à la page d'accueil</a></div>";
+            exit();
+        }
+    break;
+    
 
     case 'deconnexion':
         unset($_SESSION['id']);

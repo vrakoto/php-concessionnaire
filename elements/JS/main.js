@@ -69,8 +69,57 @@ function rechercherVehicule()
     )
 }
 
-function categorieDeuxRoues()
+function showCatDeuxRoues(leType)
 {
+    if ($(leType).val() === 'deuxRoues') {
+        return $('#categorieDeuxRoues').css({display: "block"});
+    } else {
+        return $('#categorieDeuxRoues').css({display: "none"});
+    }
+}
 
-    console.log($('#categorieDeuxRoues'));
+function contacter()
+{
+    
+}
+
+function suggestionsQuestion()
+{
+    if ($('#questionFrequentes').css('display') === "none") {
+        $('#questionFrequentes').css({display: "block"});
+        $('#btnSugQst').text('Masquer les suggestions');
+    } else {
+        $('#btnSugQst').text('Afficher suggestions de question');
+        $('#questionFrequentes').css({display: "none"});
+    }
+
+}
+
+function setSuggestionMessage(leMessage, leVehicule)
+{
+    let message = "";
+    switch (leMessage) {
+        case 'disponible':
+            message = "Bonjour Je suis intéressé par votre " + leVehicule + ". Le véhicule est-il toujours disponible ? Cordialement";
+        break;
+
+        case 'prix':
+            message = "Bonjour Je suis intéressé par votre " + leVehicule + ". Votre prix est-il négociable ? Cordialement";
+        break;
+
+        case 'photos':
+            message = "Bonjour Je suis intéressé par votre " + leVehicule + ". Pourriez-vous me transmettre davantage de photos de votre véhicule ? Cordialement";
+        break;
+
+        case 'entretien':
+            message = "Bonjour Je suis intéressé par votre " + leVehicule + ". Des frais sont-ils à prévoir sur votre véhicule ? Cordialement";
+        break;
+
+        case 'financement':
+            message = "Bonjour Je suis intéressé par votre " + leVehicule + ". Faites-vous des offres de financement pour l'achat de ce véhicule ? Cordialement";
+        break;
+    }
+    
+    $('#premierContact').empty();
+    $('#premierContact').append(message);
 }

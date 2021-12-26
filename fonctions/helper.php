@@ -14,10 +14,14 @@ function form_item(string $id, string $titre, string $typeInput, string $varPHP,
 HTML;
 }
 
-function nav_item(string $lien, string $titre): string
+function nav_item(string $lien, string $titre, string $recognizeTitle = NULL): string
 {
     $active = "";
     $titreInVar = strtolower($titre);
+    if ($recognizeTitle !== NULL) {
+        $titreInVar = strtolower($recognizeTitle);
+    }
+
     if (preg_match("/\b$titreInVar\b/", $_SERVER['REQUEST_URI'])) {
         $active = "active";
     }
