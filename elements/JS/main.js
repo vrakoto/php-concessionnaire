@@ -25,7 +25,7 @@ function getLesMarques(type)
                 rechercherVehicule();
             },
             error: (e) => {
-                console.log(e);
+                console.log("internal error");
             }
         }
     )
@@ -44,7 +44,7 @@ function getLesModeles()
                 $('#modele').append(e);
             },
             error: (e) => {
-                console.log(e);
+                console.log("internal error");
             }
         }
     )
@@ -63,7 +63,7 @@ function rechercherVehicule()
                 $('.lesVehicules').append(e);
             },
             error: (e) => {
-                console.log(e);
+                console.log("internal error");
             }
         }
     )
@@ -76,11 +76,6 @@ function showCatDeuxRoues(leType)
     } else {
         return $('#categorieDeuxRoues').css({display: "none"});
     }
-}
-
-function contacter()
-{
-    
 }
 
 function suggestionsQuestion()
@@ -107,10 +102,6 @@ function setSuggestionMessage(leMessage, leVehicule)
             message = "Bonjour Je suis intéressé par votre " + leVehicule + ". Votre prix est-il négociable ? Cordialement";
         break;
 
-        case 'photos':
-            message = "Bonjour Je suis intéressé par votre " + leVehicule + ". Pourriez-vous me transmettre davantage de photos de votre véhicule ? Cordialement";
-        break;
-
         case 'entretien':
             message = "Bonjour Je suis intéressé par votre " + leVehicule + ". Des frais sont-ils à prévoir sur votre véhicule ? Cordialement";
         break;
@@ -122,4 +113,67 @@ function setSuggestionMessage(leMessage, leVehicule)
     
     $('#premierContact').empty();
     $('#premierContact').append(message);
+}
+
+function rechercherContact()
+{
+    const input = $('#rechercheAmiConv').val();
+    const inputFilter = input.toLowerCase();
+    $('.leContact').each(function() {
+        const leAmi = $(this).find('.leContact-nom').text();
+
+        if (!leAmi.includes(inputFilter)) {
+            $(this).addClass("filtrerContact");
+        } else {
+            $(this).removeClass("filtrerContact");
+        }
+    });
+}
+
+var ccc = "";
+function ouvrirConversation(idVehicule, leContact, currentCardContact)
+{
+    ccc = currentCardContact;
+    $.ajax
+    (
+        {
+            method: 'post',
+            url: 'index.php?action=ouvrirConversation',
+            data: 'idVehicule=' + idVehicule + '&leContact=' + leContact,
+            success: (e) => {
+                $('.leContact').not(currentCardContact).removeClass('active');
+                $(currentCardContact).addClass('active');
+                $('.laConversation').empty();
+                $('.laConversation').append(e);
+                $('.msg_card_body').scrollTop($('.msg_card_body').get(0).scrollHeight);
+            },
+            error: (e) => {
+                console.log("internal error");
+            }
+        }
+    )
+}
+
+function envoyerMessage(idVehicule, leContact)
+{
+    const message = $('#message').val();
+    $.ajax
+    (
+        {
+            method: 'post',
+            url: 'index.php?action=envoyerMessage',
+            data: 'idVehicule=' + idVehicule + '&leContact=' + leContact + '&message=' + message,
+            success: (data) => {
+                ouvrirConversation(idVehicule, leContact, ccc);
+                const datas = JSON.parse(data);
+                if (datas.erreur) {
+                    $('#messageStatus').modal('show');
+                    $('#messageContentStatus').text(datas.erreur);
+                }
+            },
+            error: (e) => {
+                console.log("internal error");
+            }
+        }
+    )
 }

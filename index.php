@@ -174,7 +174,8 @@ switch ($action) {
             }
         }
 
-        $convExistante = !empty($pdo->getConversation($vendeur));
+        $convExistante = !empty($pdo->getConversation($idVehic, $vendeur));
+        $monVehicule = $pdo->estMonVehicule($idVehic);
         require_once $vues . 'vehicule.php';
     break;
 
@@ -203,8 +204,12 @@ switch ($action) {
             exit();
         } catch (\Throwable $th) {
             echo "<div class='container alert alert-danger text-center'>Erreur 404 <br/><a href='index.php?action=accueil'>Revenir à la page d'accueil</a></div>";
-            exit();
         }
+    break;
+
+    case 'messagerie':
+        $lesContacts = $pdo->getMesContacts();
+        require_once $vues . 'messagerie.php';
     break;
     
 

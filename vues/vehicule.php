@@ -27,18 +27,26 @@
         <h3><?= $marque ?></h3>
         <h5><?= $modele ?></h5>
         <h5><b><?= number_format($prix) ?> &euro;</b></h5>
+
         <?php if (!$connexion) : ?>
           <a href="index.php?action=pageConnexion">Connectez-vous pour contacter</a>
         <?php else : ?>
-          <?php if (!$convExistante): ?>
-            <button type="button" class="btn btn-primary w-100 mt-2" data-bs-toggle="modal" data-bs-target="#contacter">Contacter</button>
+
+          <?php if (!$monVehicule) : ?>
+            <?php if (!$convExistante) : ?>
+              <button type="button" class="btn btn-primary w-100 mt-2" data-bs-toggle="modal" data-bs-target="#contacter">Contacter</button>
+            <?php else : ?>
+              Une conversation existe déjà pour ce véhicule.
+            <?php endif ?>
           <?php else: ?>
-            Une conversation existe déjà pour ce véhicule.
+            <div class="alert alert-success text-center mb-0 mt-4"><i class="fas fa-check"></i> Votre véhicule</div>
           <?php endif ?>
 
-          <form method="POST" action="index.php?action=supprimerVehicule&id=<?= $id ?>">
-            <button type="submit" class="btn btn-danger w-100 mt-2"><i class="fas fa-trash"></i> Supprimer de mes ventes</button>
-          </form>
+          <?php if ($monVehicule) : ?>
+            <form method="POST" action="index.php?action=supprimerVehicule&id=<?= $id ?>">
+              <button type="submit" class="btn btn-danger w-100 mt-2"><i class="fas fa-trash"></i> Supprimer de mes ventes</button>
+            </form>
+          <?php endif ?>
 
         <?php endif ?>
       </div>
@@ -77,7 +85,6 @@
         <div class="questionFrequentes" id="questionFrequentes">
           <button type="button" class="btn btn-primary" onclick="setSuggestionMessage('disponible', '<?= $marque . ' ' . $modele ?>')">Véhicule toujours disponible ?</button>
           <button type="button" class="btn btn-primary" onclick="setSuggestionMessage('prix', '<?= $marque . ' ' . $modele ?>')">Prix négociable ?</button>
-          <button type="button" class="btn btn-primary" onclick="setSuggestionMessage('photos', '<?= $marque . ' ' . $modele ?>')">Demande de photos supplémentaires</button>
           <button type="button" class="btn btn-primary" onclick="setSuggestionMessage('entretien', '<?= $marque . ' ' . $modele ?>')">Opération / Frais à prévoir ?</button>
           <button type="button" class="btn btn-primary" onclick="setSuggestionMessage('financement', '<?= $marque . ' ' . $modele ?>')">Offre de financement</button>
         </div>

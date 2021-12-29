@@ -81,4 +81,94 @@ HTML;
         }
         exit();
     break;
+
+    case 'ouvrirConversation':
+        $idVehicule = htmlentities($_POST['idVehicule']);
+        $idContact = htmlentities($_POST['leContact']);
+        $laConversation = $pdo->getConversation($idVehicule, $idContact);
+
+        echo <<<HTML
+        <div class='card-header msg_head'>
+            <div class='d-flex bd-highlight'>
+                <div class='img_cont'>
+                    <img src='https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg' class='rounded-circle user_img'>
+                    <span class='online_icon'></span>
+                </div>
+                <div class='user_info'>
+                    <span>Discutez avec <a href="index.php?action=profil&id=" class="text-white" . $idContact>$idContact</a></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body msg_card_body">
+HTML;
+
+        foreach ($laConversation as $conversation) {
+            $idClient = htmlentities($conversation['idClient']);
+            $idVendeur = htmlentities($conversation['idVendeur']);
+            $idVehicule = htmlentities($conversation['idVehicule']);
+            $message = $conversation['message'];
+            $date = htmlentities($conversation['date']);
+
+            if ($connexion === $idClient) {
+                echo "
+                <div class='d-flex justify-content-end mb-4'>
+                    <div class='msg_auteur'>
+                        $message
+                        <span class='msg_time_send'></span>
+                    </div>
+
+                    <div class='img_cont_msg'>
+                        <img src='https://picsum.photos/200' class='rounded-circle user_img_msg'>
+                    </div>
+                </div>
+                ";
+            } else {
+                echo "
+                <div class='d-flex justify-content-start mb-4'>
+                    <div class='img_cont_msg'>
+                        <img src='https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg' class='rounded-circle user_img_msg'>
+                    </div>
+                    <div class='msg_receveur'>
+                        $message
+                        <span class='msg_time'></span>
+                    </div>
+                </div>
+                ";
+            }
+        }
+
+        echo <<<HTML
+        </div>
+        <div class='card-footer'>
+            <div class='input-group'>
+                <textarea class='form-control type_msg' id="message" placeholder='Insérez un message ...'></textarea>
+                <div class='input-group-append'>
+                    <span class='input-group-text send_btn' onclick='envoyerMessage("$idVehicule", "$idContact")'><i class='fas fa-location-arrow'></i></span>
+                </div>
+            </div>
+        </div>
+HTML;
+        exit();
+    break;
+
+    case 'envoyerMessage':
+        $erreurs = [];
+        $idVehicule = htmlentities($_POST['idVehicule']);
+        $idContact = htmlentities($_POST['leContact']);
+        $message = htmlentities($_POST['message']);
+
+        if (mb_strlen($message) <= 0) {
+            $erreurs['erreur'] = "Le message est vide";
+        } else {
+            try {
+                $pdo->envoyerMessage($idVehicule, $idContact, nl2br($message));
+            } catch (PDOException $e) {
+                $erreurs['erreur'] = "L'envoi du message a échoué";
+            }
+        }
+
+        echo json_encode($erreurs);
+        exit();
+    break;
 }

@@ -15,7 +15,7 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container-fluid">
-            <div class="navbar-brand">ConcessionnaireV2</div>
+            <div class="navbar-brand"><?= $connexion ?? 'ConcessionnaireV2' ?></div>
 
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -35,6 +35,7 @@
                         <a href="index.php?action=pageConnexion" class="btn btn-outline-success me-2">Connexion</a>
                         <a href="index.php?action=pageInscription" class="btn btn-outline-secondary">Inscription</a>
                     <?php else : ?>
+                        <a href="index.php?action=messagerie" class="btn btn-outline-success me-2">Messagerie</a>
                         <a href="index.php?action=deconnexion" class="btn btn-outline-danger">Déconnexion</a>
                     <?php endif ?>
                 </form>

@@ -181,6 +181,17 @@ class Authentification {
         return $p->fetchAll();
     }
 
+    function estMonVehicule(string $idVehicule): bool
+    {
+        $req = "SELECT id FROM vehicule WHERE id = :idVehicule AND vendeur = :idVendeur";
+        $p = $this->pdo->prepare($req);
+        $p->execute([
+            'idVehicule' => $idVehicule,
+            'idVendeur' => $_SESSION['id'] ?? '',
+        ]);
+        return !empty($p->fetch());
+    }
+
     function supprimerVehicule(string $idVehicule): bool
     {
         $req = "DELETE FROM vehicule WHERE id = :idVehicule AND vendeur = :idVendeur";
@@ -191,20 +202,47 @@ class Authentification {
         ]);
     }
 
-
-    function getConversation(string $idUtilisateur): array
+    function getMesContacts(): array
     {
-        $req = "SELECT * FROM message WHERE (idClient = :idClient AND idVendeur = :idVendeur) OR (idClient = :idVendeur AND idVendeur = :idClient) ORDER BY date DESC";
+        $req = "SELECT idVehicule, idClient, idVendeur FROM message
+                WHERE :currentUser IN (idClient, idVendeur)
+                GROUP BY idClient, idVendeur
+                ORDER BY idClient, idVendeur";
         $p = $this->pdo->prepare($req);
         $p->execute([
-            'idClient' => $_SESSION['id'],
-            'idVendeur' => $idUtilisateur,
+            'currentUser' => $_SESSION['id'],
+        ]);
+
+        $lesContacts = $p->fetchAll();
+        $contacts = []; // stock tous contacts sauf l'auth connecté
+
+        foreach ($lesContacts as $contact) {
+            if ($contact['idClient'] !== $_SESSION['id'] ) {
+                $contacts[$contact['idVehicule']] = $contact['idClient'];
+
+            } else if ($contact['idVendeur'] !== $_SESSION['id']) {
+                $contacts[$contact['idVehicule']] = $contact['idVendeur'];
+            }
+        }
+        return $contacts;
+    }
+
+    function getConversation(string $idVehicule, string $idUtilisateur): array
+    {
+        $req = "SELECT * FROM message
+                WHERE idVehicule = :idVehicule
+                AND (idClient = :idClient OR idClient = :idVendeur)
+                AND (idVendeur = :idClient OR idVendeur = :idVendeur)";
+        $p = $this->pdo->prepare($req);
+        $p->execute([
+            'idVehicule' => $idVehicule,
+            'idClient' => $_SESSION['id'] ?? '',
+            'idVendeur' => $idUtilisateur
         ]);
 
         return $p->fetchAll();
     }
-    
-    
+
     function envoyerMessage(string $idVehic, string $vendeur, string $message): bool
     {
         $req = "INSERT INTO message (idVehicule, idClient, idVendeur, message) VALUES (:idVehicule, :idClient, :idVendeur, :message)";

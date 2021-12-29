@@ -1,5 +1,12 @@
 <?php
-global $pdo;
+
+function includeCSS(string $nomFichier): string
+{
+    return <<<HTML
+    <link rel="stylesheet" href="elements/CSS/$nomFichier.css">
+HTML;
+}
+
 function form_item(string $id, string $titre, string $typeInput, string $varPHP, string $placeholder = NULL, bool $keepValueOnSubmit = FALSE): string
 {
     $value = '';
