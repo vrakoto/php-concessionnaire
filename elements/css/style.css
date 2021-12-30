@@ -55,3 +55,7 @@
 #contacter textarea {
     height: 100px;
 }
+
+#profil .d-inline-block p {
+    margin-bottom: 0;
+}

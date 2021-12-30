@@ -1,5 +1,14 @@
 <?php
-// exit() à la fin des cases servent à empêcher la récupération du header
+session_start();
+$root = dirname(__DIR__) . DIRECTORY_SEPARATOR;
+$fonctions = $root . 'fonctions' . DIRECTORY_SEPARATOR;
+
+require_once $root . 'bdd' . DIRECTORY_SEPARATOR . 'Authentification.php';
+require_once $fonctions . 'helper.php';
+$pdo = new Authentification;
+$connexion = $_SESSION['id'] ?? '';
+
+$action = htmlentities($_REQUEST['action']);
 switch ($action) {
     case 'getLesMarques':
         $type = htmlentities($_GET['type']);
@@ -10,7 +19,6 @@ switch ($action) {
             $marque = htmlentities($m['marque']);
             echo "<option value='$marque'>$marque</option>";
         }
-        exit();
     break;
 
     case 'getLesModeles':
@@ -23,7 +31,6 @@ switch ($action) {
             $modele = htmlentities($m['modele']);
             echo "<option value='$modele'>$modele</option>";
         }
-        exit();
     break;
 
     case 'rechercherVehicule':
@@ -79,7 +86,6 @@ HTML;
         } catch (PDOException $error) {
             throw $msg = $error->getMessage();
         }
-        exit();
     break;
 
     case 'ouvrirConversation':
@@ -95,7 +101,7 @@ HTML;
                     <span class='online_icon'></span>
                 </div>
                 <div class='user_info'>
-                    <span>Discutez avec <a href="index.php?action=profil&id=" class="text-white" . $idContact>$idContact</a></span>
+                    <span>Discutez avec <a href="index.php?action=profil&id=$idContact" class="text-white" . $idContact>$idContact</a></span>
                 </div>
             </div>
         </div>
@@ -149,7 +155,6 @@ HTML;
             </div>
         </div>
 HTML;
-        exit();
     break;
 
     case 'envoyerMessage':
@@ -169,6 +174,5 @@ HTML;
         }
 
         echo json_encode($erreurs);
-        exit();
     break;
 }

@@ -16,7 +16,7 @@ function getLesMarques(type)
     (
         {
             method: 'get',
-            url: 'index.php?action=getLesMarques',
+            url: '../ajax/index.php?action=getLesMarques',
             data: 'type=' + type,
             success: (e) => {
                 $('#marque').empty();
@@ -37,7 +37,7 @@ function getLesModeles()
     (
         {
             method: 'get',
-            url: 'index.php?action=getLesModeles',
+            url: '../ajax/index.php?action=getLesModeles',
             data: 'type=' + currentType + '&marque=' + $('#marque').val(),
             success: (e) => {
                 $('#modele').empty();
@@ -56,7 +56,7 @@ function rechercherVehicule()
     (
         {
             method: 'get',
-            url: 'index.php?action=rechercherVehicule',
+            url: '../ajax/index.php?action=rechercherVehicule',
             data: 'type=' + currentType + '&marque=' + $('#marque').val() + '&modele=' + $('#modele').val() + '&annee=' + $('#annee').val() + '&transmission=' + $('#transmission').val() + '&prix=' + $('#prix').val() + '&energie=' + $('#energie').val() + '&region=' + $('#region').val(),
             success: (e) => {
                 $('.lesVehicules').empty();
@@ -138,7 +138,7 @@ function ouvrirConversation(idVehicule, leContact, currentCardContact)
     (
         {
             method: 'post',
-            url: 'index.php?action=ouvrirConversation',
+            url: '../ajax/index.php?action=ouvrirConversation',
             data: 'idVehicule=' + idVehicule + '&leContact=' + leContact,
             success: (e) => {
                 $('.leContact').not(currentCardContact).removeClass('active');
@@ -161,7 +161,7 @@ function envoyerMessage(idVehicule, leContact)
     (
         {
             method: 'post',
-            url: 'index.php?action=envoyerMessage',
+            url: '../ajax/index.php?action=envoyerMessage',
             data: 'idVehicule=' + idVehicule + '&leContact=' + leContact + '&message=' + message,
             success: (data) => {
                 ouvrirConversation(idVehicule, leContact, ccc);

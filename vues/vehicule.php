@@ -1,10 +1,12 @@
-<div class="vehicule container mt-5">
-  <?php if (isset($erreur)) : ?>
+<?php if (isset($erreur)) : ?>
+  <div class="container">
     <div class="alert alert-danger text-center">
-      <?= $erreur ?? '' ?>
+      <?= $erreur ?>
     </div>
-  <?php endif ?>
+  </div>
+<?php endif ?>
 
+<div class="vehicule container mt-5">
   <div class="d-flex">
 
     <div class="imgVehic">
@@ -16,8 +18,7 @@
         <div class="infos-vendeur">
           <img class="rounded" src="https://picsum.photos/80" width="80" height="80">
           <div class="d-inline-block align-middle m-3">
-            <a href="index.php?action=profil&<?= $vendeur ?>"><?= $vendeur ?></a>
-            <p>nbVehicule vendus</p>
+            <a href="index.php?action=profil&id=<?= $vendeur ?>"><?= $vendeur ?></a>
             <p>Avis</p>
           </div>
         </div>
@@ -29,7 +30,7 @@
         <h5><b><?= number_format($prix) ?> &euro;</b></h5>
 
         <?php if (!$connexion) : ?>
-          <a href="index.php?action=pageConnexion">Connectez-vous pour contacter</a>
+          <a href="index.php?action=connexion">Connectez-vous pour contacter</a>
         <?php else : ?>
 
           <?php if (!$monVehicule) : ?>
@@ -38,7 +39,7 @@
             <?php else : ?>
               Une conversation existe déjà pour ce véhicule.
             <?php endif ?>
-          <?php else: ?>
+          <?php else : ?>
             <div class="alert alert-success text-center mb-0 mt-4"><i class="fas fa-check"></i> Votre véhicule</div>
           <?php endif ?>
 
@@ -65,7 +66,7 @@
       <p>Transmission : <?= $transmission ?></p>
       <p>Kilométrage totalisé : <?= $km ?> km</p>
       <p>Energie : <?= $energie ?></p>
-      <p>Publié le : <?= $publication ?></p>
+      <p>Publié le : <?= convertDate($publication, TRUE) ?></p>
     </div>
   </div>
 </div>

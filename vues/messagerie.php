@@ -11,14 +11,14 @@
                 <div class="card-body contacts_body">
                     <ul class="contacts">
                         <?php foreach ($lesContacts as $idVehicule => $contact) : ?>
-                            <li class="leContact" onclick="ouvrirConversation('<?= $idVehicule ?>', '<?= $contact ?>', this)">
+                            <li class="leContact" onclick="ouvrirConversation('<?= $idVehicule ?>', '<?= $contact['id'] ?>', this)">
                                 <div class="d-flex bd-highlight">
                                     <div class="img_cont">
                                         <img src="https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg" class="rounded-circle user_img">
                                         <span class="online_icon"></span>
                                     </div>
                                     <div class="user_info">
-                                        <span class="leContact-nom"><?= $contact ?></span>
+                                        <span class="leContact-nom"><?= $contact['id'] . ' - ' . $contact['marque'] . ' ' . $contact['modele'] ?></span>
                                     </div>
                                 </div>
                             </li>

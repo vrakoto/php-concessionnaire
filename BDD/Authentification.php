@@ -31,7 +31,7 @@ class Authentification {
 
     function getUtilisateur(string $idUtilisateur): array
     {
-        $req = "SELECT avatar, nom, prenom, ville  FROM client WHERE id = :id";
+        $req = "SELECT avatar, nom, prenom, ville, dateCreation FROM client WHERE id = :id";
         $p = $this->pdo->prepare($req);
         $p->execute([
             'id' => $idUtilisateur
@@ -117,21 +117,22 @@ class Authentification {
      */
     function getLesVehicules(string $typeVehic = NULL): array
     {
+        $req = "SELECT * FROM vehicule WHERE status = 'VENTE' AND type = ";
         switch ($typeVehic) {
             case 'automobile':
-                $req = "SELECT * FROM vehicule WHERE type = 'automobile'";
+                $req .= "'automobile'";
             break;
 
             case 'deuxRoues':
-                $req = "SELECT * FROM vehicule WHERE type = 'deuxRoues'";
+                $req .= "'deuxRoues'";
             break;
 
             case 'edpm':
-                $req = "SELECT * FROM vehicule WHERE type = 'edpm'";
+                $req .= "'edpm'";
             break;
             
             default:
-                $req = "SELECT * FROM vehicule";
+                $req = "SELECT * FROM vehicule WHERE status = 'VENTE'";
             break;
         }
         $req .= " ORDER BY publication DESC";
@@ -149,6 +150,17 @@ class Authentification {
         ]);
 
         return $p->fetch();
+    }
+
+    function getMesVendus(): array
+    {
+        $req = "SELECT * FROM vehicule WHERE vendeur = :vendeur AND status = 'VENDU' ORDER BY publication";
+        $p = $this->pdo->prepare($req);
+        $p->execute([
+            'vendeur' => $_SESSION['id']
+        ]);
+
+        return $p->fetchAll();
     }
 
     function getVehiculesUtilisateur(string $idUtilisateur): array
@@ -202,11 +214,11 @@ class Authentification {
         ]);
     }
 
-    function getMesContacts(): array
+    function getMesContacts()
     {
         $req = "SELECT idVehicule, idClient, idVendeur FROM message
                 WHERE :currentUser IN (idClient, idVendeur)
-                GROUP BY idClient, idVendeur
+                GROUP BY idVehicule
                 ORDER BY idClient, idVendeur";
         $p = $this->pdo->prepare($req);
         $p->execute([
@@ -218,10 +230,19 @@ class Authentification {
 
         foreach ($lesContacts as $contact) {
             if ($contact['idClient'] !== $_SESSION['id'] ) {
-                $contacts[$contact['idVehicule']] = $contact['idClient'];
-
+                $contacts[$contact['idVehicule']] = 
+                [
+                    'marque' => $this->getLeVehicule($contact['idVehicule'])['marque'],
+                    'modele' => $this->getLeVehicule($contact['idVehicule'])['modele'],
+                    'id' => $contact['idClient']
+                ];
             } else if ($contact['idVendeur'] !== $_SESSION['id']) {
-                $contacts[$contact['idVehicule']] = $contact['idVendeur'];
+                $contacts[$contact['idVehicule']] = 
+                [
+                    'marque' => $this->getLeVehicule($contact['idVehicule'])['marque'],
+                    'modele' => $this->getLeVehicule($contact['idVehicule'])['modele'],
+                    'id' => $contact['idVendeur']
+                ];
             }
         }
         return $contacts;

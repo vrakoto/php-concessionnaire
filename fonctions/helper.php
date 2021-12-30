@@ -3,7 +3,7 @@
 function includeCSS(string $nomFichier): string
 {
     return <<<HTML
-    <link rel="stylesheet" href="elements/CSS/$nomFichier.css">
+    <link rel="stylesheet" href="../elements/CSS/$nomFichier.css">
 HTML;
 }
 
@@ -58,4 +58,13 @@ function valOptionSub(string $varPHP, string $valeur): string
         $s = "selected";
     }
     return $s;
+}
+
+function convertDate(string $date, bool $heure = FALSE)
+{
+    if ($heure === TRUE) {
+        $heure = " à H:i";
+    }
+    $date = new DateTime($date);
+    return $date->format('d/m/Y' . $heure);
 }
