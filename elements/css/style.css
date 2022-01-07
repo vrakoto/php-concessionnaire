@@ -59,3 +59,7 @@
 #profil .d-inline-block p {
     margin-bottom: 0;
 }
+
+.tab-content {
+    overflow: auto;
+}

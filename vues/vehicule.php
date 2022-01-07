@@ -41,11 +41,12 @@
             <?php endif ?>
           <?php else : ?>
             <div class="alert alert-success text-center mb-0 mt-4"><i class="fas fa-check"></i> Votre véhicule</div>
-          <?php endif ?>
-
-          <?php if ($monVehicule) : ?>
+            <?php if ($vehicEnVente): ?>
+              <button class="btn btn-warning w-100 mt-2" onclick="supprimerVente(<?= $id ?>, this)"><i class="fas fa-trash"></i> Retirer de mes ventes</button>
+            <?php endif ?>
+            
             <form method="POST" action="index.php?action=supprimerVehicule&id=<?= $id ?>">
-              <button type="submit" class="btn btn-danger w-100 mt-2"><i class="fas fa-trash"></i> Supprimer de mes ventes</button>
+              <button type="submit" class="btn btn-danger w-100 mt-2"><i class="fas fa-trash"></i> Supprimer le véhicule</button>
             </form>
           <?php endif ?>
 

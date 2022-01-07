@@ -1,10 +1,8 @@
 <?php
 session_start();
 $root = dirname(__DIR__) . DIRECTORY_SEPARATOR;
-$fonctions = $root . 'fonctions' . DIRECTORY_SEPARATOR;
-
 require_once $root . 'bdd' . DIRECTORY_SEPARATOR . 'Authentification.php';
-require_once $fonctions . 'helper.php';
+require_once $root . 'fonctions' . DIRECTORY_SEPARATOR . 'helper.php';
 $pdo = new Authentification;
 $connexion = $_SESSION['id'] ?? '';
 
@@ -56,32 +54,8 @@ switch ($action) {
             ]);
 
             foreach ($resultat as $vehicule) {
-                require $fonctions . 'varVehicule.php';
-                if ($type === 'deuxRoues') {
-                    $type = 'Deux Roues';
-                }
-                $monVehicule = "";
-                if ($vendeur === $connexion) {
-                    $monVehicule = "Votre véhicule";
-                }
-                echo <<<HTML
-                <a href="index.php?action=vehicule&id=$id" class="leVehicule d-flex flex-row card w-100 mb-5">
-                    <img class="img-fluid" src="$image" width="250" alt="Image du véhicule">
-                    <div class="card-body">
-                        <p class="text-success">$monVehicule</p>
-                        <h4 class="card-title">$type</h4>
-                        <h6 class="mt-3 mb-0">$marque $modele</h6>
-                        <i>$region</i>
-                        <h6 class="mt-3"><b>$prix &euro;</b></h6>
-
-                        <p>$description</p>
-                        <span>$annee | </span>
-                        <span>$km km | </span>
-                        <span>$energie | </span>
-                        <span>$transmission</span>
-                    </div>
-                </a>
-HTML;
+                require $root . 'fonctions' . DIRECTORY_SEPARATOR . 'varVehicule.php';
+                require $root . 'fonctions' . DIRECTORY_SEPARATOR . 'varCardVehicule.php';
             }
         } catch (PDOException $error) {
             throw $msg = $error->getMessage();
@@ -89,20 +63,60 @@ HTML;
     break;
 
     case 'ouvrirConversation':
-        $idVehicule = htmlentities($_POST['idVehicule']);
+        $erreurs = [];
+        $idVehicule = (int)$_POST['idVehicule'];
+        $marque = $pdo->getLeVehicule($idVehicule)['marque'];
+        $modele = $pdo->getLeVehicule($idVehicule)['modele'];
         $idContact = htmlentities($_POST['leContact']);
+
         $laConversation = $pdo->getConversation($idVehicule, $idContact);
 
+        ob_start();
+        echo <<<HTML
+        <div>
+            <button type="button" class="btn btn-success" onclick="actionAchat('$idVehicule', '$idContact', 'ACCEPTE')">Valider</button>
+            <button type="button" class="btn btn-danger" onclick="actionAchat('$idVehicule', '$idContact', 'REFUSE')">Refuser</button>
+        </div>
+HTML;
+        $actionAchat = ob_get_clean();
+
+        ob_start();
+        $demandeAchat = '';
+        if ($connexion === $pdo->getLeVehicule($idVehicule)['vendeur']) {
+            switch ($pdo->statusDemandeAchat($idVehicule, $idContact)) {
+                case 'EN COURS':
+                    $demandeAchat = $actionAchat;
+                break;
+
+                case 'ACCEPTE':
+                    $demandeAchat = "<span class='text-success'>Vehicule vendu</span>";
+                break;
+
+                case 'REFUSE':
+                    $demandeAchat = "<span class='text-success'>Vehicule refusé</span>";
+                break;
+            }
+        } else {
+            if (empty($pdo->statusDemandeAchat($idVehicule, $connexion))) {
+                $demandeAchat = "<button class='btn btn-success' onclick='demanderAchat($idVehicule)'>Demander un achat</button>";
+            } else {
+                $demandeAchat = "<span class='text-warning'>Demande en cours de réponse ...</span>";
+            }
+        }
+        $content = ob_get_clean();
+
+        
         echo <<<HTML
         <div class='card-header msg_head'>
-            <div class='d-flex bd-highlight'>
+            <div class='d-flex align-items-center bd-highlight'>
                 <div class='img_cont'>
                     <img src='https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg' class='rounded-circle user_img'>
                     <span class='online_icon'></span>
                 </div>
                 <div class='user_info'>
-                    <span>Discutez avec <a href="index.php?action=profil&id=$idContact" class="text-white" . $idContact>$idContact</a></span>
+                    <span>Discussion avec <a class="text-white" href="index.php?action=profil&id=$idContact">$idContact</a> sur : <a class="text-white" href="index.php?action=vehicule&id=$idVehicule">$marque $modele</a></span>
                 </div>
+                <div id='infAchat' style='margin-left: auto'>{$demandeAchat}</div>
             </div>
         </div>
 
@@ -110,18 +124,17 @@ HTML;
 HTML;
 
         foreach ($laConversation as $conversation) {
-            $idClient = htmlentities($conversation['idClient']);
-            $idVendeur = htmlentities($conversation['idVendeur']);
-            $idVehicule = htmlentities($conversation['idVehicule']);
+            $auteur = htmlentities($conversation['auteur']);
             $message = $conversation['message'];
-            $date = htmlentities($conversation['date']);
+            $dateInit = htmlentities($conversation['date']);
+            $date = convertDate($dateInit, TRUE);
 
-            if ($connexion === $idClient) {
+            if ($connexion === $auteur) {
                 echo "
                 <div class='d-flex justify-content-end mb-4'>
                     <div class='msg_auteur'>
                         $message
-                        <span class='msg_time_send'></span>
+                        <span class='msg_time_send'>$date</span>
                     </div>
 
                     <div class='img_cont_msg'>
@@ -137,7 +150,7 @@ HTML;
                     </div>
                     <div class='msg_receveur'>
                         $message
-                        <span class='msg_time'></span>
+                        <span class='msg_time'>$date</span>
                     </div>
                 </div>
                 ";
@@ -146,7 +159,7 @@ HTML;
 
         echo <<<HTML
         </div>
-        <div class='card-footer'>
+        <div class='card-footer text-center'>
             <div class='input-group'>
                 <textarea class='form-control type_msg' id="message" placeholder='Insérez un message ...'></textarea>
                 <div class='input-group-append'>
@@ -160,19 +173,69 @@ HTML;
     case 'envoyerMessage':
         $erreurs = [];
         $idVehicule = htmlentities($_POST['idVehicule']);
-        $idContact = htmlentities($_POST['leContact']);
+        $destinataire = htmlentities($_POST['leContact']);
         $message = htmlentities($_POST['message']);
 
         if (mb_strlen($message) <= 0) {
             $erreurs['erreur'] = "Le message est vide";
         } else {
             try {
-                $pdo->envoyerMessage($idVehicule, $idContact, nl2br($message));
+                $pdo->envoyerMessage($idVehicule, $destinataire, nl2br($message));
             } catch (PDOException $e) {
-                $erreurs['erreur'] = "L'envoi du message a échoué";
+                $erreurs['erreur'] = "L'envoi du message a échoué" . $e;
             }
         }
 
+        echo json_encode($erreurs);
+    break;
+
+    case 'demanderAchat':
+        $erreurs = [];
+        $idVehicule = htmlentities($_POST['idVehicule']);
+        $proprio = $pdo->getLeVehicule($idVehicule)['vendeur'];
+        try {
+            $pdo->demanderAchat($idVehicule, $proprio);
+        } catch (\Throwable $e) {
+            $erreurs['erreur'] = "Demande d'achat impossible ";
+        }
+        echo json_encode($erreurs);
+    break;
+
+    case 'actionAchat':
+        $erreurs = [];
+        $idVehicule = htmlentities($_POST['idVehicule']);
+        $idClient = htmlentities($_POST['idClient']);
+        $decision = htmlentities($_POST['decision']);
+
+        try {
+            $pdo->actionAchat($idVehicule, $idClient, $decision);
+        } catch (\Throwable $e) {
+            $erreurs['erreur'] = "Action impossible" . $e;
+        }
+        echo json_encode($erreurs);
+    break;
+
+    case 'supprimerVente':
+        $erreurs = [];
+        $idVehicule = htmlentities($_POST['idVehicule']);
+
+        try {
+            $pdo->changerStatusVehicule($idVehicule, 'VENDU');
+        } catch (\Throwable $th) {
+            $erreurs['erreur'] = "Suppression du véhicule de votre vente impossible" . $e;
+        }
+        echo json_encode($erreurs);
+    break;
+
+    case 'revendre':
+        $erreurs = [];
+        $idVehicule = (int)$_POST['idVehicule'];
+
+        try {
+            $pdo->changerStatusVehicule($idVehicule, 'VENTE');
+        } catch (\Throwable $th) {
+            $erreurs['erreur'] = "Revente impossible" . $e;
+        }
         echo json_encode($erreurs);
     break;
 }

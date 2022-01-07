@@ -1,6 +1,26 @@
-const currentType = window.location.href.split("type=")[1];
+let url = window.location.href;
+const currentType = url.split("type=")[1];
+
 $(document).ready(() => {
-    getLesMarques(currentType);
+    if (url.indexOf("action=parcourir") != -1 ) {
+        getLesMarques(currentType);
+    }
+
+    // profil de l'utilisateur
+    // conserve onglet sélectionné dans les cookies
+    if (url.indexOf("action=profil") != -1) {
+        $('button[data-bs-toggle="tab"]').on('show.bs.tab', function(e) {
+            localStorage.setItem('active', $(e.target).attr('data-bs-target'));
+        });
+        const active = localStorage.getItem('active');
+        if (active) {
+            $(active + '-tab').addClass("active");
+            $(active).addClass("active show");
+        } else {
+            $('#vehiculesVentes-tab').addClass("active");
+            $('#vehiculesVentes').addClass("active show");
+        }
+    }
 });
 
 $('textarea').on("input", function() {
@@ -8,7 +28,6 @@ $('textarea').on("input", function() {
     const currentLength = $(this).val().length;
     return $('#countChrTxtArea').text(maxlength - currentLength + " mot(s) restant(s)");
 });
-
 
 function getLesMarques(type)
 {   
@@ -140,11 +159,11 @@ function ouvrirConversation(idVehicule, leContact, currentCardContact)
             method: 'post',
             url: '../ajax/index.php?action=ouvrirConversation',
             data: 'idVehicule=' + idVehicule + '&leContact=' + leContact,
-            success: (e) => {
+            success: (data) => {
                 $('.leContact').not(currentCardContact).removeClass('active');
                 $(currentCardContact).addClass('active');
                 $('.laConversation').empty();
-                $('.laConversation').append(e);
+                $('.laConversation').append(data);
                 $('.msg_card_body').scrollTop($('.msg_card_body').get(0).scrollHeight);
             },
             error: (e) => {
@@ -169,6 +188,108 @@ function envoyerMessage(idVehicule, leContact)
                 if (datas.erreur) {
                     $('#messageStatus').modal('show');
                     $('#messageContentStatus').text(datas.erreur);
+                }
+            },
+            error: (e) => {
+                console.log("internal error");
+            }
+        }
+    )
+}
+
+function demanderAchat(idVehicule)
+{
+    $.ajax
+    (
+        {
+            method: 'post',
+            url: '../ajax/index.php?action=demanderAchat',
+            data: 'idVehicule=' + idVehicule,
+            success: (data) => {
+                const datas = JSON.parse(data);
+                if (datas.erreur) {
+                    $('#messageStatus').modal('show');
+                    $('#messageContentStatus').text(datas.erreur);
+                } else {
+                    $('#infAchat').empty();
+                    $('#infAchat').append("<span class='text-warning ms-auto'>Demande en cours de réponse ...</span>");
+                }
+            },
+            error: (e) => {
+                console.log("internal error");
+            }
+        }
+    )
+}
+
+function actionAchat(idVehicule, idClient, decision)
+{
+    const quest = window.confirm('Voulez vous confirmez cette décision ? Votre conversation avec ce client sera supprimée.');
+    if (quest === true) {
+        $.ajax
+        (
+            {
+                method: 'post',
+                url: '../ajax/index.php?action=actionAchat',
+                data: 'idVehicule=' + idVehicule + '&idClient=' + idClient + '&decision=' + decision,
+                success: (data) => {
+                    const datas = JSON.parse(data);
+                    if (datas.erreur) {
+                        $('#messageStatus').modal('show');
+                        $('#messageContentStatus').text(datas.erreur);
+                    } else {
+                        location.reload();
+                    }
+                },
+                error: (e) => {
+                    console.log("internal error");
+                }
+            }
+        )
+    }
+}
+
+function supprimerVente(idVehicule, currentBtn)
+{
+    $.ajax
+    (
+        {
+            method: 'post',
+            url: '../ajax/index.php?action=supprimerVente',
+            data: 'idVehicule=' + idVehicule,
+            success: (data) => {
+                const datas = JSON.parse(data);
+                if (datas.erreur) {
+                    $('#messageStatus').modal('show');
+                    $('#messageContentStatus').text(datas.erreur);
+                } else {
+                    $(currentBtn).remove();
+                    $('#messageStatus').modal('show');
+                    $('#messageContentStatus').text("Véhicule supprimé de vos ventes !");
+                }
+            },
+            error: (e) => {
+                console.log("internal error");
+            }
+        }
+    )
+}
+
+function revendre(idVehicule)
+{
+    $.ajax
+    (
+        {
+            method: 'post',
+            url: '../ajax/index.php?action=revendre',
+            data: 'idVehicule=' + idVehicule,
+            success: (data) => {
+                const datas = JSON.parse(data);
+                if (datas.erreur) {
+                    $('#messageStatus').modal('show');
+                    $('#messageContentStatus').text(datas.erreur);
+                } else {
+                    location.reload();
                 }
             },
             error: (e) => {

@@ -13,3 +13,11 @@ $prix = (int)$vehicule['prix'];
 $energie = htmlentities($vehicule['energie']);
 $description = $vehicule['description'];
 $publication = htmlentities($vehicule['publication']);
+
+if ($type === 'deuxRoues') {
+    $type = 'Deux Roues';
+}
+$monVehicule = "";
+if ($vendeur === $connexion) {
+    $monVehicule = "Votre véhicule";
+}

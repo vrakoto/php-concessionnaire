@@ -152,28 +152,53 @@ class Authentification {
         return $p->fetch();
     }
 
-    function getMesVendus(): array
+    function getVehiculesUtilisateur(string $idUtilisateur, string $status): array
     {
-        $req = "SELECT * FROM vehicule WHERE vendeur = :vendeur AND status = 'VENDU' ORDER BY publication";
+        $req = "SELECT * FROM vehicule
+                WHERE vendeur = :idUtilisateur
+                AND status = :status
+                ORDER BY publication";
         $p = $this->pdo->prepare($req);
         $p->execute([
-            'vendeur' => $_SESSION['id']
+            'idUtilisateur' => $idUtilisateur,
+            'status' => $status
         ]);
 
         return $p->fetchAll();
     }
 
-    function getVehiculesUtilisateur(string $idUtilisateur): array
+    function getVehiculesVentesUtilisateur(string $idUtilisateur, string $status): array
     {
-        $req = "SELECT * FROM vehicule v
-                WHERE vendeur = (SELECT id FROM client WHERE id = :idUtilisateur)
-                ORDER BY publication DESC";
+        $req = "SELECT * FROM vehicule
+                WHERE vendeur = :idUtilisateur
+                AND status = :status
+                ORDER BY publication";
+        $p = $this->pdo->prepare($req);
+        $p->execute([
+            'idUtilisateur' => $idUtilisateur,
+            'status' => $status
+        ]);
+
+        return $p->fetchAll();
+    }
+
+    function getVehiculesVendusUtilisateur(string $idUtilisateur): array
+    {
+        $req = "SELECT idVehicule FROM demande_achat
+                WHERE vendeur = :idUtilisateur
+                AND status = 'ACCEPTE'
+                ORDER BY dateDemande";
         $p = $this->pdo->prepare($req);
         $p->execute([
             'idUtilisateur' => $idUtilisateur
         ]);
 
-        return $p->fetchAll();
+        $vehicules = [];
+        foreach ($p->fetchAll() as $vehicule) {
+            $vehicules[] = $this->getLeVehicule($vehicule['idVehicule']);
+        }
+
+        return $vehicules;
     }
 
     function rechercherVehicule(array $champs): array
@@ -186,22 +211,12 @@ class Authentification {
                 $req .= " AND $champ = :$champ";
             }
         }
-        $req .= " ORDER BY publication DESC";
+        $req .= " AND status = 'VENTE'
+                ORDER BY publication DESC";
         
         $p = $this->pdo->prepare($req);
         $p->execute($searchNotNull);
         return $p->fetchAll();
-    }
-
-    function estMonVehicule(string $idVehicule): bool
-    {
-        $req = "SELECT id FROM vehicule WHERE id = :idVehicule AND vendeur = :idVendeur";
-        $p = $this->pdo->prepare($req);
-        $p->execute([
-            'idVehicule' => $idVehicule,
-            'idVendeur' => $_SESSION['id'] ?? '',
-        ]);
-        return !empty($p->fetch());
     }
 
     function supprimerVehicule(string $idVehicule): bool
@@ -214,66 +229,130 @@ class Authentification {
         ]);
     }
 
-    function getMesContacts()
+    function getContactClients()
     {
-        $req = "SELECT idVehicule, idClient, idVendeur FROM message
-                WHERE :currentUser IN (idClient, idVendeur)
-                GROUP BY idVehicule
-                ORDER BY idClient, idVendeur";
+        $req = "SELECT c.idVehicule, c.auteur,
+                v.marque, v.modele, v.annee
+                FROM conversation c
+                JOIN vehicule v on c.idVehicule = v.id
+                WHERE c.idVehicule IN (SELECT id FROM vehicule WHERE vendeur = :currentUser)
+                AND NOT c.auteur = :currentUser
+                GROUP BY c.idVehicule, c.auteur
+                ORDER BY c.date";
+
         $p = $this->pdo->prepare($req);
         $p->execute([
-            'currentUser' => $_SESSION['id'],
-        ]);
-
-        $lesContacts = $p->fetchAll();
-        $contacts = []; // stock tous contacts sauf l'auth connecté
-
-        foreach ($lesContacts as $contact) {
-            if ($contact['idClient'] !== $_SESSION['id'] ) {
-                $contacts[$contact['idVehicule']] = 
-                [
-                    'marque' => $this->getLeVehicule($contact['idVehicule'])['marque'],
-                    'modele' => $this->getLeVehicule($contact['idVehicule'])['modele'],
-                    'id' => $contact['idClient']
-                ];
-            } else if ($contact['idVendeur'] !== $_SESSION['id']) {
-                $contacts[$contact['idVehicule']] = 
-                [
-                    'marque' => $this->getLeVehicule($contact['idVehicule'])['marque'],
-                    'modele' => $this->getLeVehicule($contact['idVehicule'])['modele'],
-                    'id' => $contact['idVendeur']
-                ];
-            }
-        }
-        return $contacts;
-    }
-
-    function getConversation(string $idVehicule, string $idUtilisateur): array
-    {
-        $req = "SELECT * FROM message
-                WHERE idVehicule = :idVehicule
-                AND (idClient = :idClient OR idClient = :idVendeur)
-                AND (idVendeur = :idClient OR idVendeur = :idVendeur)";
-        $p = $this->pdo->prepare($req);
-        $p->execute([
-            'idVehicule' => $idVehicule,
-            'idClient' => $_SESSION['id'] ?? '',
-            'idVendeur' => $idUtilisateur
+            'currentUser' => $_SESSION['id']
         ]);
 
         return $p->fetchAll();
     }
 
-    function envoyerMessage(string $idVehic, string $vendeur, string $message): bool
+    function getContactVendeurs()
     {
-        $req = "INSERT INTO message (idVehicule, idClient, idVendeur, message) VALUES (:idVehicule, :idClient, :idVendeur, :message)";
+        $req = "SELECT c.idVehicule, c.auteur,
+                v.vendeur, v.marque, v.modele, v.annee
+                FROM conversation c
+                JOIN vehicule v on c.idVehicule = v.id
+                WHERE c.idVehicule NOT IN (SELECT id FROM vehicule WHERE vendeur = :currentUser)
+                AND c.auteur = :currentUser
+                GROUP BY c.idVehicule, c.auteur";
+
+        $p = $this->pdo->prepare($req);
+        $p->execute([
+            'currentUser' => $_SESSION['id']
+        ]);
+
+        return $p->fetchAll();
+    }
+
+    function getConversation(string $idVehicule, string $idContact)
+    {
+        $req = "SELECT c.auteur, c.destinataire, c.message, c.date,
+                v.vendeur
+                FROM conversation c
+                JOIN vehicule v on c.idVehicule = v.id
+                WHERE (c.auteur = :currentUser AND c.destinataire = :idContact AND c.idVehicule = :idVehicule)
+                OR (c.auteur = :idContact AND c.destinataire = :currentUser AND c.idVehicule = :idVehicule)";
+
+        $p = $this->pdo->prepare($req);
+        $p->execute([
+            'idVehicule' => $idVehicule,
+            'idContact' => $idContact,
+            'currentUser' => $_SESSION['id'] ?? ''
+        ]);
+
+        return $p->fetchAll();
+    }
+
+    function envoyerMessage(string $idVehicule, string $destinataire, string $message): bool
+    {
+        $req = "INSERT INTO conversation (idVehicule, auteur, destinataire, message) VALUES (:idVehicule, :auteur, :destinataire, :message)";
         $p = $this->pdo->prepare($req);
         return $p->execute([
-            'idVehicule' => $idVehic,
-            'idClient' => $_SESSION['id'],
-            'idVendeur' => $vendeur,
+            'idVehicule' => $idVehicule,
+            'auteur' => $_SESSION['id'],
+            'destinataire' => $destinataire,
             'message' => $message
         ]);
     }
 
+    function demanderAchat(string $idVehicule, string $proprio): bool
+    {
+        $req = "INSERT INTO demande_achat (idVehicule, vendeur, idClient) VALUES (:idVehicule, :proprio, :idClient)";
+        $p = $this->pdo->prepare($req);
+        return $p->execute([
+            'idVehicule' => $idVehicule,
+            'proprio' => $proprio,
+            'idClient' => $_SESSION['id']
+        ]);
+    }
+
+    function statusDemandeAchat(string $idVehicule, string $idClient): string
+    {
+        $req = "SELECT status FROM demande_achat WHERE idVehicule = :idVehicule AND idClient = :idClient";
+        $p = $this->pdo->prepare($req);
+        $p->execute([
+            'idVehicule' => $idVehicule,
+            'idClient' => $idClient
+        ]);
+
+        return $p->fetch()['status'] ?? '';
+    }
+
+    function actionAchat(string $idVehicule, string $idClient, string $decision): bool
+    {
+        if ($decision === 'ACCEPTE') {
+            $this->changerProprio($idVehicule, $idClient);
+            $this->changerStatusVehicule($idVehicule, 'VENDU');
+        }
+
+        $req = "UPDATE demande_achat SET status = :status WHERE idVehicule = :idVehicule AND idClient = :idClient";
+        $p = $this->pdo->prepare($req);
+        return $p->execute([
+            'idVehicule' => $idVehicule,
+            'idClient' => $idClient,
+            'status' => $decision
+        ]);
+    }
+
+    function changerProprio(string $idVehicule, string $idClient): bool
+    {
+        $req = "UPDATE vehicule SET vendeur = :idClient WHERE id = :idVehicule";
+        $p = $this->pdo->prepare($req);
+        return $p->execute([
+            'idClient' => $idClient,
+            'idVehicule' => $idVehicule
+        ]);
+    }
+
+    function changerStatusVehicule(string $idVehicule, string $status): bool
+    {
+        $req = "UPDATE vehicule SET status = :status WHERE id = :idVehicule";
+        $p = $this->pdo->prepare($req);
+        return $p->execute([
+            'idVehicule' => $idVehicule,
+            'status' => $status,
+        ]);
+    }
 }

@@ -12,22 +12,43 @@
         </div>
     </div>
 
-    <?php foreach ($lesVehicules as $vehicule): ?>
-        <?php require $fonctions . 'varVehicule.php' ?>
-        <a href="index.php?action=vehicule&id=<?= $id ?>" class="mt-5 leVehicule d-flex flex-row card w-100 mb-5">
-            <img class="img-fluid" src="<?= $image ?>" width="250" alt="Image du véhicule">
-            <div class="card-body">
-                <h4 class="card-title"><?= $type ?></h4>
-                <h6 class="mt-3 mb-0"><?= $marque . ' ' . $modele ?></h6>
-                <i><?= $region ?></i>
-                <h6 class="mt-3"><b><?= $prix ?> &euro;</b></h6>
+    <ul class="nav nav-tabs mt-3" role="tablist" id="myTab">
+        <li class="nav-item">
+            <button class="nav-link" id="vehiculesVentes-tab" data-bs-toggle="tab" data-bs-target="#vehiculesVentes" type="button" role="tab" aria-controls="vehiculesVentes" aria-selected="true">Véhicules en ventes (<?= $nbVehiculesEnVentes ?>)</button>
+        </li>
 
-                <p><?= $description ?></p>
-                <span><?= $annee ?> | </span>
-                <span><?= $km ?> km</span>
-                <span><?= $energie ?> | </span>
-                <span><?= $transmission ?></span>
-            </div>
-        </a>
-    <?php endforeach ?>
+        <li class="nav-item">
+            <button class="nav-link" id="mesVehicules-tab" data-bs-toggle="tab" data-bs-target="#mesVehicules" type="button" role="tab" aria-controls="mesVehicules" aria-selected="false">Ses véhicules (  <?= $nbMesVehicules ?>)</button>
+        </li>
+
+        <li class="nav-item">
+            <button class="nav-link" id="vehiculesVendus-tab" data-bs-toggle="tab" data-bs-target="#vehiculesVendus" type="button" role="tab" aria-controls="vehiculesVendus" aria-selected="false">Véhicules vendus (<?= $nbVehiculesVendus ?>)</button>
+        </li>
+    </ul>
+
+
+    <div class="tab-content">
+
+        <div class="tab-pane fade" id="vehiculesVentes" role="tabpanel" aria-labelledby="vehiculesVentes-tab">
+            <?php foreach ($lesVehiculesEnVentes as $vehicule) : ?>
+                <?php require $fonctions . 'varVehicule.php' ?>
+                <?php require $fonctions . 'varCardVehicule.php' ?>
+            <?php endforeach ?>
+        </div>
+
+        <div class="tab-pane fade" id="mesVehicules" role="tabpanel" aria-labelledby="mesVehicules-tab">
+            <?php foreach ($mesVehicules as $vehicule) : ?>
+                <?php require $fonctions . 'varVehicule.php' ?>
+                <?php require $fonctions . 'varCardVehicule.php' ?>
+            <?php endforeach ?>
+        </div>
+
+        <div class="tab-pane fade" id="vehiculesVendus" role="tabpanel" aria-labelledby="vehiculesVendus-tab">
+            <?php foreach ($lesVehiculesVendus as $vehicule) : ?>
+                <?php require $fonctions . 'varVehicule.php' ?>
+                <?php require $fonctions . 'varCardVehicule.php' ?>
+            <?php endforeach ?>
+        </div>
+
+    </div>
 </div>
