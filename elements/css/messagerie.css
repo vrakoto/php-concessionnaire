@@ -5,6 +5,14 @@ body, html {
     background: linear-gradient(to right, #91EAE4, #86A8E7, #7F7FD5);
 }
 
+.nav-tabs {
+    margin-top: 10px;
+}
+
+.ongletContact {
+    color: #000;
+}
+
 .filtrerContact {
     display: none !important;
 }
@@ -26,7 +34,15 @@ body, html {
 }
 
 .leContact {
+    display: flex;
     cursor: pointer;
+    width: 100%;
+    padding: 5px 10px;
+    margin-top: 15px;
+}
+
+.leContact:hover {
+    background-color: rgba(0, 0, 0, 0.3);
 }
 
 .msg_card_body {
@@ -80,18 +96,7 @@ body, html {
     cursor: pointer;
 }
 
-.contacts {
-    list-style: none;
-    padding: 0;
-}
-
-.contacts li {
-    width: 100% !important;
-    padding: 5px 10px;
-    margin-bottom: 15px !important;
-}
-
-.active {
+.activeContact {
     background-color: rgba(0, 0, 0, 0.3);
 }
 

@@ -6,6 +6,10 @@ $(document).ready(() => {
         getLesMarques(currentType);
     }
 
+    if (url.indexOf("messagerie") != -1) {
+        getMesVehiculesVentes();
+    }
+
     // profil de l'utilisateur
     // conserve onglet sélectionné dans les cookies
     if (url.indexOf("action=profil") != -1) {
@@ -35,7 +39,7 @@ function getLesMarques(type)
     (
         {
             method: 'get',
-            url: '../ajax/index.php?action=getLesMarques',
+            url: 'ajax/index.php?action=getLesMarques',
             data: 'type=' + type,
             success: (e) => {
                 $('#marque').empty();
@@ -44,7 +48,7 @@ function getLesMarques(type)
                 rechercherVehicule();
             },
             error: (e) => {
-                console.log("internal error");
+                console.log("internal error" + e);
             }
         }
     )
@@ -56,7 +60,7 @@ function getLesModeles()
     (
         {
             method: 'get',
-            url: '../ajax/index.php?action=getLesModeles',
+            url: 'ajax/index.php?action=getLesModeles',
             data: 'type=' + currentType + '&marque=' + $('#marque').val(),
             success: (e) => {
                 $('#modele').empty();
@@ -75,7 +79,7 @@ function rechercherVehicule()
     (
         {
             method: 'get',
-            url: '../ajax/index.php?action=rechercherVehicule',
+            url: 'ajax/index.php?action=rechercherVehicule',
             data: 'type=' + currentType + '&marque=' + $('#marque').val() + '&modele=' + $('#modele').val() + '&annee=' + $('#annee').val() + '&transmission=' + $('#transmission').val() + '&prix=' + $('#prix').val() + '&energie=' + $('#energie').val() + '&region=' + $('#region').val(),
             success: (e) => {
                 $('.lesVehicules').empty();
@@ -134,6 +138,26 @@ function setSuggestionMessage(leMessage, leVehicule)
     $('#premierContact').append(message);
 }
 
+
+
+function getMesVehiculesVentes()
+{
+    $.ajax
+    (
+        {
+            method: 'get',
+            url: 'ajax/index.php?action=getMesVehiculesVentes',
+            success: (data) => {
+                $('#mesContacts').empty();
+                $('#mesContacts').append(data);
+            },
+            error: (e) => {
+                console.log("internal error" + e);
+            }
+        }
+    )
+}
+
 function rechercherContact()
 {
     const input = $('#rechercheAmiConv').val();
@@ -149,7 +173,25 @@ function rechercherContact()
     });
 }
 
-var ccc = "";
+function getLesContacts(idVehicule, idContactBody)
+{
+    $.ajax
+    (
+        {
+            method: 'post',
+            url: 'ajax/index.php?action=getLesContacts',
+            data: 'idVehicule=' + idVehicule + '&typeContact=' + idContactBody,
+            success: (data) => {
+                $('#' + idContactBody).empty();
+                $('#' + idContactBody).append(data);
+            },
+            error: (e) => {
+                console.log("internal error");
+            }
+        }
+    )
+}
+
 function ouvrirConversation(idVehicule, leContact, currentCardContact)
 {
     ccc = currentCardContact;
@@ -157,11 +199,11 @@ function ouvrirConversation(idVehicule, leContact, currentCardContact)
     (
         {
             method: 'post',
-            url: '../ajax/index.php?action=ouvrirConversation',
+            url: 'ajax/index.php?action=ouvrirConversation',
             data: 'idVehicule=' + idVehicule + '&leContact=' + leContact,
             success: (data) => {
-                $('.leContact').not(currentCardContact).removeClass('active');
-                $(currentCardContact).addClass('active');
+                $('.leContact').not(currentCardContact).removeClass('activeContact');
+                $(currentCardContact).addClass('activeContact');
                 $('.laConversation').empty();
                 $('.laConversation').append(data);
                 $('.msg_card_body').scrollTop($('.msg_card_body').get(0).scrollHeight);
@@ -180,7 +222,7 @@ function envoyerMessage(idVehicule, leContact)
     (
         {
             method: 'post',
-            url: '../ajax/index.php?action=envoyerMessage',
+            url: 'ajax/index.php?action=envoyerMessage',
             data: 'idVehicule=' + idVehicule + '&leContact=' + leContact + '&message=' + message,
             success: (data) => {
                 ouvrirConversation(idVehicule, leContact, ccc);
@@ -203,7 +245,7 @@ function demanderAchat(idVehicule)
     (
         {
             method: 'post',
-            url: '../ajax/index.php?action=demanderAchat',
+            url: 'ajax/index.php?action=demanderAchat',
             data: 'idVehicule=' + idVehicule,
             success: (data) => {
                 const datas = JSON.parse(data);
@@ -230,7 +272,7 @@ function actionAchat(idVehicule, idClient, decision)
         (
             {
                 method: 'post',
-                url: '../ajax/index.php?action=actionAchat',
+                url: 'ajax/index.php?action=actionAchat',
                 data: 'idVehicule=' + idVehicule + '&idClient=' + idClient + '&decision=' + decision,
                 success: (data) => {
                     const datas = JSON.parse(data);
@@ -249,13 +291,16 @@ function actionAchat(idVehicule, idClient, decision)
     }
 }
 
+
+
+
 function supprimerVente(idVehicule, currentBtn)
 {
     $.ajax
     (
         {
             method: 'post',
-            url: '../ajax/index.php?action=supprimerVente',
+            url: 'ajax/index.php?action=supprimerVente',
             data: 'idVehicule=' + idVehicule,
             success: (data) => {
                 const datas = JSON.parse(data);
@@ -281,7 +326,7 @@ function revendre(idVehicule)
     (
         {
             method: 'post',
-            url: '../ajax/index.php?action=revendre',
+            url: 'ajax/index.php?action=revendre',
             data: 'idVehicule=' + idVehicule,
             success: (data) => {
                 const datas = JSON.parse(data);

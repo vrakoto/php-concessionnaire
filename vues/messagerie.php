@@ -11,65 +11,42 @@
 
                 <ul class="nav nav-tabs" role="tablist">
                     <li class="nav-item">
-                        <button class="nav-link active" id="mesVehicules-tab" data-bs-toggle="tab" data-bs-target="#mesVehicules" type="button" role="tab" aria-controls="mesVehicules">Mes véhicules en ventes</button>
+                        <button class="ongletContact nav-link active" id="mesVehicules-tab" data-bs-toggle="tab" data-bs-target="#mesVehicules" type="button" role="tab" aria-controls="mesVehicules">Mes véhicules en ventes</button>
                     </li>
 
                     <li class="nav-item">
-                        <button class="nav-link" id="lesVendeurs-tab" data-bs-toggle="tab" data-bs-target="#lesVendeurs" type="button" role="tab" aria-controls="lesVendeurs">Les véhicules que je suis intéressé</button>
+                        <button class="ongletContact nav-link" id="lesVendeurs-tab" data-bs-toggle="tab" data-bs-target="#lesVendeurs" type="button" role="tab" aria-controls="lesVendeurs">Les véhicules intéressés</button>
                     </li>
+
                 </ul>
 
                 <div class="tab-content">
 
                     <div class="tab-pane fade show active" id="mesVehicules" role="tabpanel" aria-labelledby="mesVehicules-tab">
-                        <div class="card-body contacts_body">
-                            <ul class="contacts">
-                                <?php foreach ($lesClients as $client) :
-                                    $idVehicule = htmlentities($client['idVehicule']);
-                                    $auteur = htmlentities($client['auteur']);
-                                    $marque = htmlentities($client['marque']);
-                                    $modele = htmlentities($client['modele']);
-                                    $annee = (int)$client['annee'];
-                                ?>
-                                    <li class="leContact" onclick="ouvrirConversation('<?= $idVehicule ?>', '<?= $auteur ?>', this)">
-                                        <div class="d-flex bd-highlight">
-                                            <div class="img_cont">
-                                                <img src="https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg" class="rounded-circle user_img">
-                                                <span class="online_icon"></span>
-                                            </div>
-                                            <div class="user_info">
-                                                <span class="leContact-nom"><?= $auteur . ' : ' . $marque . ' ' . $modele . ' ' . $annee ?></span>
-                                            </div>
-                                        </div>
-                                    </li>
-                                <?php endforeach ?>
-                            </ul>
-                        </div>
+                        <div class="card-body contacts_body" id="mesContacts"></div>
                     </div>
 
                     <div class="tab-pane fade show" id="lesVendeurs" role="tabpanel" aria-labelledby="lesVendeurs-tab">
-                        <div class="card-body contacts_body">
-                            <ul class="contacts">
-                                <?php foreach ($lesVendeurs as $vendeur) :
-                                    $idVehicule = htmlentities($vendeur['idVehicule']);
-                                    $auteur = htmlentities($vendeur['vendeur']);
-                                    $marque = htmlentities($vendeur['marque']);
-                                    $modele = htmlentities($vendeur['modele']);
-                                    $annee = (int)$vendeur['annee'];
-                                ?>
-                                    <li class="leContact" onclick="ouvrirConversation('<?= $idVehicule ?>', '<?= $auteur ?>', this)">
-                                        <div class="d-flex bd-highlight">
-                                            <div class="img_cont">
-                                                <img src="https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg" class="rounded-circle user_img">
-                                                <span class="online_icon"></span>
-                                            </div>
-                                            <div class="user_info">
-                                                <span class="leContact-nom"><?= $auteur . ' : ' . $marque . ' ' . $modele . ' ' . $annee ?></span>
-                                            </div>
-                                        </div>
-                                    </li>
-                                <?php endforeach ?>
-                            </ul>
+                        <div class="card-body contacts_body" id="contactInteresse">
+                            <?php foreach ($lesVehiculesInteresses as $vendeur) :
+                                $idVehicule = htmlentities($vendeur['idVehicule']);
+                                $auteur = htmlentities($vendeur['vendeur']);
+                                $marque = htmlentities($vendeur['marque']);
+                                $modele = htmlentities($vendeur['modele']);
+                                $annee = (int)$vendeur['annee'];
+                            ?>
+                            <div class="leContact" onclick="ouvrirConversation('<?= $idVehicule ?>', '<?= $auteur ?>', this)">
+                                <div class="d-flex bd-highlight">
+                                    <div class="img_cont">
+                                        <img src="https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg" class="rounded-circle user_img">
+                                        <span class="online_icon"></span>
+                                    </div>
+                                    <div class="user_info">
+                                        <span class="leContact-nom"><?= $auteur . ' : ' . $marque . ' ' . $modele . ' ' . $annee ?></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <?php endforeach ?>
                         </div>
                     </div>
 

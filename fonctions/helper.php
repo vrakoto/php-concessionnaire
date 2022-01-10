@@ -3,7 +3,7 @@
 function includeCSS(string $nomFichier): string
 {
     return <<<HTML
-    <link rel="stylesheet" href="../elements/CSS/$nomFichier.css">
+    <link rel="stylesheet" href="elements/CSS/$nomFichier.css">
 HTML;
 }
 

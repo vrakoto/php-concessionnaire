@@ -7,7 +7,7 @@ class Authentification {
 
     function __construct()
     {
-        $this->pdo = new PDO('mysql:host=localhost;dbname=concessionnaireV2', 'root', 'root', [
+        $this->pdo = new PDO('mysql:host=localhost;dbname=concessionnairev2', 'root', 'root', [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
         ]);
@@ -51,10 +51,10 @@ class Authentification {
     {
         $req = "SELECT DISTINCT";
         if (array_search($type, array_column($this->getLesTypes(), 'id')) === FALSE) {
-            $req .= " marque FROM vehicule"; // Affiche TOUTES les marques peu importe le type
+            $req .= " marque FROM vehicule WHERE status = 'VENTE'"; // Affiche TOUTES les marques peu importe le type
             $p = $this->pdo->query($req);
         } else {
-            $req .= " marque FROM vehicule WHERE type = :type";
+            $req .= " marque FROM vehicule WHERE type = :type AND status = 'VENTE'";
             $p = $this->pdo->prepare($req);
             $p->execute([
                 'type' => $type
@@ -67,19 +67,19 @@ class Authentification {
     function getLesModeles(string $type, string $marque): array
     {
         $elements = [];
-        $req = "SELECT DISTINCT modele FROM vehicule";
+        $req = "SELECT DISTINCT modele FROM vehicule WHERE status = 'VENTE'";
 
         if ($type !== 'tous' && $marque !== 'tous') {
-            $req .= " WHERE type = :type AND marque = :marque";
+            $req .= " AND type = :type AND marque = :marque";
             $elements['type'] = $type;
             $elements['marque'] = $marque;
 
         } else if ($type !== 'tous') {
-            $req .= " WHERE type = :type";
+            $req .= " AND type = :type";
             $elements['type'] = $type;
 
         } else if ($marque !== 'tous') {
-            $req .= " WHERE marque = :marque";
+            $req .= " AND marque = :marque";
             $elements['marque'] = $marque;
         }
 
@@ -167,21 +167,6 @@ class Authentification {
         return $p->fetchAll();
     }
 
-    function getVehiculesVentesUtilisateur(string $idUtilisateur, string $status): array
-    {
-        $req = "SELECT * FROM vehicule
-                WHERE vendeur = :idUtilisateur
-                AND status = :status
-                ORDER BY publication";
-        $p = $this->pdo->prepare($req);
-        $p->execute([
-            'idUtilisateur' => $idUtilisateur,
-            'status' => $status
-        ]);
-
-        return $p->fetchAll();
-    }
-
     function getVehiculesVendusUtilisateur(string $idUtilisateur): array
     {
         $req = "SELECT idVehicule FROM demande_achat
@@ -229,14 +214,15 @@ class Authentification {
         ]);
     }
 
-    function getContactClients()
+    
+    function listeVentesInteresses(): array
     {
         $req = "SELECT c.idVehicule, c.auteur,
-                v.marque, v.modele, v.annee
+                v.vendeur, v.marque, v.modele, v.annee
                 FROM conversation c
                 JOIN vehicule v on c.idVehicule = v.id
-                WHERE c.idVehicule IN (SELECT id FROM vehicule WHERE vendeur = :currentUser)
-                AND NOT c.auteur = :currentUser
+                WHERE c.idVehicule NOT IN (SELECT id FROM vehicule WHERE vendeur = :currentUser)
+                AND c.auteur = :currentUser
                 GROUP BY c.idVehicule, c.auteur
                 ORDER BY c.date";
 
@@ -247,26 +233,43 @@ class Authentification {
 
         return $p->fetchAll();
     }
-
-    function getContactVendeurs()
+    
+    /**
+     * Soit contactInteresses OU mesContact(ou autre chose)
+     *
+     */
+    function getLesContacts(string $typeContact, int $idVehicule): array
     {
-        $req = "SELECT c.idVehicule, c.auteur,
-                v.vendeur, v.marque, v.modele, v.annee
-                FROM conversation c
-                JOIN vehicule v on c.idVehicule = v.id
-                WHERE c.idVehicule NOT IN (SELECT id FROM vehicule WHERE vendeur = :currentUser)
-                AND c.auteur = :currentUser
-                GROUP BY c.idVehicule, c.auteur";
+        if ($typeContact === 'contactInteresse') {
+            $req = "SELECT c.idVehicule,
+                    v.vendeur, v.marque, v.modele, v.annee
+                    FROM conversation c
+                    JOIN vehicule v on c.idVehicule = v.id
+                    WHERE c.idVehicule NOT IN (SELECT id FROM vehicule WHERE vendeur = :currentUser AND id = :idVehicule)
+                    AND c.auteur = :currentUser
+                    GROUP BY c.auteur
+                    ORDER BY c.date";
+        } else {
+            $req = "SELECT c.idVehicule, c.auteur as client,
+                    v.marque, v.modele, v.annee
+                    FROM conversation c
+                    JOIN vehicule v on c.idVehicule = v.id
+                    WHERE c.idVehicule IN (SELECT id FROM vehicule WHERE vendeur = :currentUser AND id = :idVehicule)
+                    AND NOT c.auteur = :currentUser
+                    GROUP BY c.auteur
+                    ORDER BY c.date";
+        }
 
         $p = $this->pdo->prepare($req);
         $p->execute([
-            'currentUser' => $_SESSION['id']
+            'currentUser' => $_SESSION['id'],
+            'idVehicule' => $idVehicule
         ]);
 
         return $p->fetchAll();
     }
 
-    function getConversation(string $idVehicule, string $idContact)
+    function getConversation(string $idVehicule, string $idContact): array
     {
         $req = "SELECT c.auteur, c.destinataire, c.message, c.date,
                 v.vendeur

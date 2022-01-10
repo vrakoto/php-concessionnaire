@@ -1,4 +1,4 @@
-<form action="index.php?action=inscription" method="POST" class="container mt-5">
+<form method="POST" class="container mt-5">
 
     <?php if (isset($erreur)) : ?>
         <div class="alert alert-danger text-center">

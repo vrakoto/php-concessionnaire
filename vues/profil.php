@@ -5,7 +5,6 @@
             <div class="d-inline-block align-middle m-3">
                 <h4 class="mb-0 text-decoration-underline"><?= $prenom . ' ' . $nom ?></h4>
                 <p>Membre depuis : <?= convertDate($dateCompte, FALSE) ?></p>
-                <p><?= $phraseVehicsVendus ?></p>
                 <p>Avis</p>
             </div>
             <p>Localisation : <?= ucfirst($ville) ?></p>

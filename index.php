@@ -1,12 +1,12 @@
 <?php
 session_start();
 $connexion = $_SESSION['id'] ?? '';
-$root = dirname(__DIR__) . DIRECTORY_SEPARATOR;
+$root = (__DIR__) . DIRECTORY_SEPARATOR;
 
 // Les dossiers
 $element = $root . 'elements' . DIRECTORY_SEPARATOR;
 $vues = $root . 'vues' . DIRECTORY_SEPARATOR;
-$bdd = $root . 'bdd' . DIRECTORY_SEPARATOR;
+$bdd = $root . 'BDD' . DIRECTORY_SEPARATOR;
 $fonctions = $root . 'fonctions' . DIRECTORY_SEPARATOR;
 $role = $root . 'role' . DIRECTORY_SEPARATOR;
 
@@ -17,18 +17,17 @@ $pdo = new Authentification;
 require_once $element . 'header.php';
 
 if (!isset($_REQUEST['action'])) {
-    header('Location:index.php?action=accueil');
+    header("Location:index.php?action=accueil");
     exit();
 }
 $action = htmlentities($_REQUEST['action']);
 
 // Conserve la page lors connexion / deconnexion
-$dontKeepURL = ["deconnexion", "connexion", "inscription"];
+$dontKeepURL = ["deconnexion", "connexion", "inscription", "messagerie"];
 if (!in_array($action, $dontKeepURL)) {
     $_SESSION['url'] = $_SERVER['QUERY_STRING'];
 }
 $currentPage = explode('action=', $_SESSION['url'])[1];
-
 
 // Gére les différents accès
 $restrictions = ["vendre", "supprimerVehicule", "messagerie", "deconnexion"];
@@ -37,7 +36,7 @@ if ($connexion) {
 }
 
 if (in_array($action, $restrictions)) {
-    header('Location:index.php?action=accueil');
+    header("Location:index.php?action=" . $currentPage);
     exit();
 }
 
@@ -53,7 +52,7 @@ switch ($action) {
 
             if ($pdo->verifierAuth($id, $mdp)) {
                 $_SESSION['id'] = $id;
-                header("Location:index.php?action=" . $currentPage);
+                header("Location:index.php?action=". $currentPage);
                 exit();
             } else {
                 $erreur = "Authentification incorrecte";
@@ -64,7 +63,7 @@ switch ($action) {
 
     case 'deconnexion':
         unset($_SESSION['id']);
-        header("Location:index.php?action=" . $currentPage);
+        header("Location:index.php?action=". $currentPage);
         exit();
     break;
 
@@ -84,7 +83,7 @@ switch ($action) {
                 $erreurs = $inscription->getErreurs();
             } else {
                 $inscription->inscrire();
-                header('Location:index.php?action=connexion');
+                header("Location:index.php?action=connexion");
                 exit();
             }
         }
@@ -135,7 +134,7 @@ switch ($action) {
             $inscription = new Vente($connexion, $image, $type, $marque, $modele, $annee, $boite, $km, $energie, $region, $description, $prix);
             if ($inscription->verifierVente()) {
                 $inscription->vendre();
-                header('Location:index.php?action=parcourir&type=tous');
+                header("Location:index.php?action=parcourir&type=tous");
                 exit();
             } else {
                 $lesRegions = $pdo->getLesRegions();
@@ -169,7 +168,7 @@ switch ($action) {
                 try {
                     // Envoie le premier message au vendeur
                     $pdo->envoyerMessage($idVehicule, $vendeur, $message);
-                    header('Location:index.php?action=vehicule&id=' . $idVehicule);
+                    header("Location:index.php?action=vehicule&id=" . $idVehicule);
                     exit();
                 } catch (PDOException $error) {
                     echo "Erreur Internal";
@@ -187,7 +186,7 @@ switch ($action) {
         $idVehicule = htmlentities($_GET['id']);
         try {
             $pdo->supprimerVehicule($idVehicule);
-            header('Location:index.php?action=profil&id=' . $connexion);
+            header("Location:index.php?action=profil&id=" . $connexion);
             exit();
         } catch (\Throwable $th) {
             echo "<div class='container alert alert-danger text-center'>Erreur 404 <br/></div>";
@@ -195,8 +194,7 @@ switch ($action) {
     break;
 
     case 'messagerie':
-        $lesClients = $pdo->getContactClients();
-        $lesVendeurs = $pdo->getContactVendeurs();
+        $lesVehiculesInteresses = $pdo->listeVentesInteresses();
         require_once $vues . 'messagerie.php';
     break;
 
@@ -212,7 +210,6 @@ switch ($action) {
 
             $lesVehiculesVendus = $pdo->getVehiculesVendusUtilisateur($idUtilisateur);
             $nbVehiculesVendus = (int)count($lesVehiculesVendus); 
-            $phraseVehicsVendus = ($nbVehiculesVendus > 1) ? "Véhicules vendus : $nbVehiculesVendus" : "Véhicule vendu : $nbVehiculesVendus";
             
             $lesVehiculesEnVentes = $pdo->getVehiculesUtilisateur($idUtilisateur, 'VENTE');
             $nbVehiculesEnVentes = (int)count($lesVehiculesEnVentes);

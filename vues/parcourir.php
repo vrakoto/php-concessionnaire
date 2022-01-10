@@ -1,3 +1,9 @@
+<style>
+    .leVehicule {
+        margin-top: unset !important;
+    }
+</style>
+
 <div class="container d-flex justify-content-evenly mt-4">
     <?= typeParcourir('tous', 'star-of-life', 'Tous', $nbVehics) ?>
     <?= typeParcourir('automobile', 'car', 'Automobile', $nbAutomobile) ?>

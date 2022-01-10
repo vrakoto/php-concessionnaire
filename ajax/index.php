@@ -1,8 +1,10 @@
 <?php
 session_start();
 $root = dirname(__DIR__) . DIRECTORY_SEPARATOR;
-require_once $root . 'bdd' . DIRECTORY_SEPARATOR . 'Authentification.php';
+require_once $root . 'BDD' . DIRECTORY_SEPARATOR . 'Authentification.php';
 require_once $root . 'fonctions' . DIRECTORY_SEPARATOR . 'helper.php';
+
+
 $pdo = new Authentification;
 $connexion = $_SESSION['id'] ?? '';
 
@@ -62,6 +64,68 @@ switch ($action) {
         }
     break;
 
+    case 'getMesVehiculesVentes':
+        $mesVehiculesEnVentes = $pdo->getVehiculesUtilisateur($connexion, 'VENTE');
+        foreach ($mesVehiculesEnVentes as $vehicule) {
+            $idVehicule = htmlentities($vehicule['id']);
+            $marque = htmlentities($vehicule['marque']);
+            $modele = htmlentities($vehicule['modele']);
+            $annee = (int)$vehicule['annee'];
+        
+            echo <<<HTML
+            <div class="leContact" onclick='getLesContacts("$idVehicule", "mesContacts")'>
+                <div class="d-flex bd-highlight">
+                    <i class="fas fa-folder-open fa-3x"></i>
+                    <div class="user_info">
+                        <span class="leContact-nom">$marque $modele $annee</span>
+                    </div>
+                </div>
+            </div>
+HTML;
+        }
+    break;
+
+    case 'getLesContacts':
+        $idVehicule = (int)$_POST['idVehicule'];
+        $typeContact = htmlentities($_POST['typeContact']);
+
+        $lesContacts = $pdo->getLesContacts($typeContact, $idVehicule);
+        $marque = $pdo->getLeVehicule($idVehicule)['marque'];
+        $modele = $pdo->getLeVehicule($idVehicule)['modele'];
+
+        echo <<<HTML
+        <div>
+            <span class="btn btn-primary" onclick='getMesVehiculesVentes()'><i class='fas fa-long-arrow-alt-left'></i></span>
+            <span class="text-center">$marque $modele</span>
+        </div>
+HTML;
+
+        foreach ($lesContacts as $client) {
+            $idVehicule = htmlentities($client['idVehicule']);
+            if ($typeContact === 'contactInteresse') {
+                $auteur = htmlentities($client['vendeur']);
+            } else {
+                $auteur = htmlentities($client['client']);
+            }
+            $marque = htmlentities($client['marque']);
+            $modele = htmlentities($client['modele']);
+            $annee = (int)$client['annee'];
+
+            echo <<<HTML
+            <div class="leContact" onclick='ouvrirConversation("$idVehicule", "$auteur", this)'>
+                <div class="img_cont">
+                    <img src="https://static.turbosquid.com/Preview/001292/481/WV/_D.jpg" class="rounded-circle user_img">
+                </div>
+                <div class="d-flex bd-highlight">
+                    <div class="user_info">
+                        <span class="leContact-nom">$auteur</span>
+                    </div>
+                </div>
+            </div>
+HTML;
+        }
+    break;
+
     case 'ouvrirConversation':
         $erreurs = [];
         $idVehicule = (int)$_POST['idVehicule'];
@@ -99,8 +163,11 @@ HTML;
         } else {
             if (empty($pdo->statusDemandeAchat($idVehicule, $connexion))) {
                 $demandeAchat = "<button class='btn btn-success' onclick='demanderAchat($idVehicule)'>Demander un achat</button>";
-            } else {
+            } else if ($pdo->statusDemandeAchat($idVehicule, $connexion) === 'EN COURS') {
                 $demandeAchat = "<span class='text-warning'>Demande en cours de réponse ...</span>";
+            } else {
+                $decision = $pdo->statusDemandeAchat($idVehicule, $connexion);
+                $demandeAchat = "<span class='text-warning'>" . $decision . "</span>";
             }
         }
         $content = ob_get_clean();
