@@ -1,14 +1,9 @@
-<style>
-    .leVehicule {
-        margin-top: unset !important;
-    }
-</style>
+<?= includeCSS('parcourir') ?>
 
-<div class="container d-flex justify-content-evenly mt-4">
+<div class="type container d-flex justify-content-evenly flex-wrap mt-4">
     <?= typeParcourir('tous', 'star-of-life', 'Tous', $nbVehics) ?>
     <?= typeParcourir('automobile', 'car', 'Automobile', $nbAutomobile) ?>
     <?= typeParcourir('deuxRoues', 'motorcycle', 'Deux roues', $nbDeuxRoues) ?>
-    <?= typeParcourir('edpm', 'biking', 'EDP(M)', $nbEDPM) ?>
 </div>
 
 <hr class="container">

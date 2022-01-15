@@ -1,7 +1,5 @@
 <?php
 
-use function PHPSTORM_META\type;
-
 class Authentification {
     protected $pdo;
 
@@ -13,31 +11,37 @@ class Authentification {
         ]);
     }
     
-    /**
-     * Vérifie l'authentification
-     *
-     */
     function verifierAuth(string $id, string $mdp): bool
     {
-        $req = "SELECT * FROM client WHERE id = :id AND mdp = :mdp";
+        $req = "SELECT * FROM client WHERE id = :id";
         $p = $this->pdo->prepare($req);
         $p->execute([
-            'id' => $id,
-            'mdp' => $mdp,
+            'id' => $id
         ]);
 
-        return !empty($p->fetchAll());
+        return !empty($p->fetch()) && password_verify($mdp, $this->getUtilisateur($id)['mdp']);
     }
 
     function getUtilisateur(string $idUtilisateur): array
     {
-        $req = "SELECT avatar, nom, prenom, ville, dateCreation FROM client WHERE id = :id";
+        $req = "SELECT * FROM client WHERE id = :id";
         $p = $this->pdo->prepare($req);
         $p->execute([
             'id' => $idUtilisateur
         ]);
 
         return $p->fetch();
+    }
+
+    function actualitesVentes(): array
+    {
+        $req = "SELECT * FROM demande_achat WHERE :id IN (vendeur, idClient) ORDER BY dateDemande DESC";
+        $p = $this->pdo->prepare($req);
+        $p->execute([
+            'id' => $_SESSION['id'] ?? ''
+        ]);
+
+        return $p->fetchAll();
     }
 
     function getLesTypes(): array
@@ -127,10 +131,6 @@ class Authentification {
                 $req .= "'deuxRoues'";
             break;
 
-            case 'edpm':
-                $req .= "'edpm'";
-            break;
-            
             default:
                 $req = "SELECT * FROM vehicule WHERE status = 'VENTE'";
             break;
@@ -157,7 +157,7 @@ class Authentification {
         $req = "SELECT * FROM vehicule
                 WHERE vendeur = :idUtilisateur
                 AND status = :status
-                ORDER BY publication";
+                ORDER BY publication DESC";
         $p = $this->pdo->prepare($req);
         $p->execute([
             'idUtilisateur' => $idUtilisateur,
@@ -330,7 +330,7 @@ class Authentification {
             $this->changerStatusVehicule($idVehicule, 'VENDU');
         }
 
-        $req = "UPDATE demande_achat SET status = :status WHERE idVehicule = :idVehicule AND idClient = :idClient";
+        $req = "UPDATE demande_achat SET status = :status, dateDemande = NOW() WHERE idVehicule = :idVehicule AND idClient = :idClient";
         $p = $this->pdo->prepare($req);
         return $p->execute([
             'idVehicule' => $idVehicule,
@@ -355,7 +355,23 @@ class Authentification {
         $p = $this->pdo->prepare($req);
         return $p->execute([
             'idVehicule' => $idVehicule,
-            'status' => $status,
+            'status' => $status
+        ]);
+    }
+
+        
+    /**
+     * revendre
+     *
+     * Applique la décote
+     */
+    function revendre(string $idVehicule, int $prix): bool
+    {
+        $req = "UPDATE vehicule SET status = 'VENTE', prix = :prix WHERE id = :idVehicule";
+        $p = $this->pdo->prepare($req);
+        return $p->execute([
+            'idVehicule' => $idVehicule,
+            'prix' => $prix
         ]);
     }
 }

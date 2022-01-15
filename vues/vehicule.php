@@ -1,3 +1,5 @@
+<?= includeCSS('vehicule') ?>
+
 <?php if (isset($erreur)) : ?>
   <div class="container">
     <div class="alert alert-danger text-center">
@@ -7,7 +9,7 @@
 <?php endif ?>
 
 <div class="vehicule container mt-5">
-  <div class="d-flex">
+  <div class="vehicule-header d-flex">
 
     <div class="imgVehic">
       <img class="img-fluid" src="<?= $image ?>" alt="Image du véhicule">
@@ -34,20 +36,24 @@
         <?php else : ?>
 
           <?php if (!$monVehicule) : ?>
+
             <?php if (!$convExistante) : ?>
               <button type="button" class="btn btn-primary w-100 mt-2" data-bs-toggle="modal" data-bs-target="#contacter">Contacter</button>
             <?php else : ?>
               Une conversation existe déjà pour ce véhicule.
             <?php endif ?>
+
           <?php else : ?>
+
             <div class="alert alert-success text-center mb-0 mt-4"><i class="fas fa-check"></i> Votre véhicule</div>
-            <?php if ($vehicEnVente): ?>
-              <button class="btn btn-warning w-100 mt-2" onclick="supprimerVente(<?= $id ?>, this)"><i class="fas fa-trash"></i> Retirer de mes ventes</button>
+
+            <?php if ($vehicEnVente) : ?>
+              <button class="btn btn-warning w-100 mt-2" onclick="supprimerVente(<?= $id ?>)"><i class="fas fa-trash"></i> Retirer de mes ventes</button>
+            <?php else: ?>
+              <button class="btn btn-primary w-100 mt-2" onclick="revendre('<?= $id ?>')">Vendre</button>
             <?php endif ?>
-            
-            <form method="POST" action="index.php?action=supprimerVehicule&id=<?= $id ?>">
-              <button type="submit" class="btn btn-danger w-100 mt-2"><i class="fas fa-trash"></i> Supprimer le véhicule</button>
-            </form>
+
+            <a class="btn btn-danger w-100 mt-2" onclick="supprimerVehicule(<?= $id ?>)"><i class="fas fa-trash"></i> Supprimer le véhicule</a>
           <?php endif ?>
 
         <?php endif ?>

@@ -30,7 +30,7 @@ if (!in_array($action, $dontKeepURL)) {
 $currentPage = explode('action=', $_SESSION['url'])[1];
 
 // Gére les différents accès
-$restrictions = ["vendre", "supprimerVehicule", "messagerie", "deconnexion"];
+$restrictions = ["vendre", "messagerie", "deconnexion"];
 if ($connexion) {
     $restrictions = ["connexion", "inscription"];
 }
@@ -42,6 +42,7 @@ if (in_array($action, $restrictions)) {
 
 switch ($action) {
     case 'accueil':
+        $actuVentes = $pdo->actualitesVentes();
         require_once $vues . 'accueil.php';
     break;
 
@@ -100,7 +101,6 @@ switch ($action) {
         $nbVehics = (int)count($pdo->getLesVehicules());
         $nbAutomobile = (int)count($pdo->getLesVehicules('automobile'));
         $nbDeuxRoues = (int)count($pdo->getLesVehicules('deuxRoues'));
-        $nbEDPM = (int)count($pdo->getLesVehicules('edpm'));
         
         $lesVehicules = $pdo->getLesVehicules($type);
         
@@ -112,20 +112,21 @@ switch ($action) {
 
 
     case 'vendre':
-        $lesTypes = $pdo->getLesTypes();
-        $lesTransmissions = $pdo->getLesTransmissions();
-        $lesEnergies = $pdo->getLesEnergies();
-        $lesRegions = $pdo->getLesRegions();
-
         if (isset($_POST['image'], $_POST['type'], $_POST['marque'], $_POST['modele'], $_POST['annee'], $_POST['boite'], $_POST['km'], $_POST['energie'], $_POST['region'], $_POST['description'], $_POST['prix'])) {
             require_once $bdd . 'Vente.php';
+
+            $lesTypes = $pdo->getLesTypes();
+            $lesTransmissions = $pdo->getLesTransmissions();
+            $lesEnergies = $pdo->getLesEnergies();
+            $lesRegions = $pdo->getLesRegions();
+
             $image = htmlentities($_POST['image']);
             $type = htmlentities($_POST['type']);
             $marque = htmlentities($_POST['marque']);
             $modele = htmlentities($_POST['modele']);
             $annee = htmlentities($_POST['annee']);
             $boite = htmlentities($_POST['boite']);
-            $km = htmlentities($_POST['km']);
+            $km = (int)$_POST['km'];
             $energie = htmlentities($_POST['energie']);
             $region = htmlentities($_POST['region']);
             $description = htmlentities($_POST['description']);
@@ -147,49 +148,49 @@ switch ($action) {
 
     // Consulter un véhicule
     case 'vehicule':
-        $erreur = NULL;
-        $idVehicule = htmlentities($_GET['id']);
-        $vehicule = $pdo->getLeVehicule($idVehicule);
-        require_once $fonctions . 'varVehicule.php';
+        if (isset($_GET['id'])) {
+            $erreur = NULL;
 
-        if (isset($_POST['message'])) {
-            $vendeur = htmlentities($_GET['leVendeur']);
-            $message = htmlentities($_POST['message']);
-    
-            if (empty($pdo->getUtilisateur($vendeur))) {
-                $erreur = "Vendeur introuvable";
-            }
-    
-            if (empty(trim($message))) {
-                $erreur = "Le message est vide";
+            $idVehicule = (int)$_GET['id'];
+            try {
+                $vehicule = $pdo->getLeVehicule($idVehicule);
+                require_once $fonctions . 'varVehicule.php';
+            } catch (\Throwable $th) {
+                $textError = 'Véhicule introuvable';
+                require_once $vues . '404.php';
+                exit();
             }
 
-            if (empty($erreur)) {
-                try {
-                    // Envoie le premier message au vendeur
-                    $pdo->envoyerMessage($idVehicule, $vendeur, $message);
-                    header("Location:index.php?action=vehicule&id=" . $idVehicule);
-                    exit();
-                } catch (PDOException $error) {
-                    echo "Erreur Internal";
+    
+            if (isset($_POST['message'])) {
+                $vendeur = htmlentities($_GET['leVendeur']);
+                $message = htmlentities($_POST['message']);
+        
+                if (empty($pdo->getUtilisateur($vendeur))) {
+                    $erreur = "Vendeur introuvable";
+                }
+        
+                if (empty(trim($message))) {
+                    $erreur = "Le message est vide";
+                }
+    
+                if (empty($erreur)) {
+                    try {
+                        // Envoie le premier message au vendeur
+                        $pdo->envoyerMessage($idVehicule, $vendeur, $message);
+                        header("Location:index.php?action=vehicule&id=" . $idVehicule);
+                        exit();
+                    } catch (PDOException $error) {
+                        echo "Erreur Internal";
+                        exit();
+                    }
                 }
             }
-        }
-
-        $convExistante = !empty($pdo->getConversation($idVehicule, $vendeur));
-        $monVehicule = $pdo->getLeVehicule($idVehicule)['vendeur'] === $connexion;
-        $vehicEnVente = $pdo->getLeVehicule($idVehicule)['status'] === 'VENTE';
-        require_once $vues . 'vehicule.php';
-    break;
-
-    case 'supprimerVehicule':   
-        $idVehicule = htmlentities($_GET['id']);
-        try {
-            $pdo->supprimerVehicule($idVehicule);
-            header("Location:index.php?action=profil&id=" . $connexion);
-            exit();
-        } catch (\Throwable $th) {
-            echo "<div class='container alert alert-danger text-center'>Erreur 404 <br/></div>";
+    
+            $convExistante = !empty($pdo->getConversation($idVehicule, $vendeur));
+            $monVehicule = ($pdo->getLeVehicule($idVehicule)['vendeur'] === $connexion);
+            $vehicEnVente = ($pdo->getLeVehicule($idVehicule)['status'] === 'VENTE');
+            require_once $vues . 'vehicule.php';
         }
     break;
 
@@ -208,18 +209,21 @@ switch ($action) {
             $ville = htmlentities($utilisateur['ville']);
             $dateCompte = htmlentities($utilisateur['dateCreation']);
 
-            $lesVehiculesVendus = $pdo->getVehiculesVendusUtilisateur($idUtilisateur);
-            $nbVehiculesVendus = (int)count($lesVehiculesVendus); 
-            
             $lesVehiculesEnVentes = $pdo->getVehiculesUtilisateur($idUtilisateur, 'VENTE');
             $nbVehiculesEnVentes = (int)count($lesVehiculesEnVentes);
 
-            $mesVehicules = $pdo->getVehiculesUtilisateur($idUtilisateur, 'VENDU');
+            $mesVehicules = $pdo->getVehiculesUtilisateur($idUtilisateur, 'VENDU'); // Status VENDU = POSSEDER
             $nbMesVehicules = (int)count($mesVehicules);
+
+            $lesVehiculesVendus = $pdo->getVehiculesVendusUtilisateur($idUtilisateur);
+            $nbVehiculesVendus = (int)count($lesVehiculesVendus); 
+            
             require_once $vues . 'profil.php';
             
         } catch (\Throwable $e) {
-            echo "<div class='alert alert-danger text-center p-4'>Utilisateur introuvable</div>";
+            $textError = 'Utilisateur introuvable';
+            require_once $vues . '404.php';
+            exit();
         }
     break;
 

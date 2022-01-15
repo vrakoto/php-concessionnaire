@@ -1,7 +1,9 @@
+<?= includeCSS('profil') ?>
+
 <div class="container mt-4" id="profil">
     <div class="card">
         <div class="card-body">
-            <img class="rounded-circle" src="https://picsum.photos/200" alt="Image de l'utilisateur" height="80" width="80">
+            <img class="rounded-circle avatar" src="https://picsum.photos/200" alt="Image de l'utilisateur" height="80" width="80">
             <div class="d-inline-block align-middle m-3">
                 <h4 class="mb-0 text-decoration-underline"><?= $prenom . ' ' . $nom ?></h4>
                 <p>Membre depuis : <?= convertDate($dateCompte, FALSE) ?></p>
@@ -11,7 +13,7 @@
         </div>
     </div>
 
-    <ul class="nav nav-tabs mt-3" role="tablist" id="myTab">
+    <ul class="nav nav-tabs mt-3" role="tablist" id="profil-onglet">
         <li class="nav-item">
             <button class="nav-link" id="vehiculesVentes-tab" data-bs-toggle="tab" data-bs-target="#vehiculesVentes" type="button" role="tab" aria-controls="vehiculesVentes" aria-selected="true">Véhicules en ventes (<?= $nbVehiculesEnVentes ?>)</button>
         </li>
@@ -30,6 +32,7 @@
 
         <div class="tab-pane fade" id="vehiculesVentes" role="tabpanel" aria-labelledby="vehiculesVentes-tab">
             <?php foreach ($lesVehiculesEnVentes as $vehicule) : ?>
+                <?php $provenance = "mesVehiculesEnVentes" ?>
                 <?php require $fonctions . 'varVehicule.php' ?>
                 <?php require $fonctions . 'varCardVehicule.php' ?>
             <?php endforeach ?>
@@ -37,6 +40,7 @@
 
         <div class="tab-pane fade" id="mesVehicules" role="tabpanel" aria-labelledby="mesVehicules-tab">
             <?php foreach ($mesVehicules as $vehicule) : ?>
+                <?php $provenance = "mesVehicules" ?>
                 <?php require $fonctions . 'varVehicule.php' ?>
                 <?php require $fonctions . 'varCardVehicule.php' ?>
             <?php endforeach ?>

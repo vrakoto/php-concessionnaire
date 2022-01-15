@@ -13,19 +13,12 @@
 
     <?= form_item('image', 'Lien de l\'image', 'text', 'image', 'Insérez le lien de l\'image ( http(s)://www.... )', TRUE) ?>
 
-    <select class="form-select" name="type" id="type" onchange="showCatDeuxRoues(this)">
+    <select class="form-select" name="type" id="type">
         <option selected value="none">Sélectionnez le type du véhicule</option>
         <option value="automobile" <?= valOptionSub('type', 'automobile') ?>>Automobile</option>
         <option value="deuxRoues" <?= valOptionSub('type', 'deuxRoues') ?>>Deux Roues</option>
-        <option value="edpm" <?= valOptionSub('type', 'edpm') ?>>EDP(M)</option>
     </select>
 
-    <select class="form-select" name="categorieDeuxRoues" id="categorieDeuxRoues">
-        <option selected value="none">Sélectionnez sa catégorie</option>
-        <option value="moto" <?= valOptionSub('categorieDeuxRoues', 'Moto') ?>>Moto</option>
-        <option value="scooter" <?= valOptionSub('categorieDeuxRoues', 'Scooter') ?>>Scooter</option>
-    </select>
-    
     <?= form_item('marque', 'Marque', 'text', 'marque', 'Insérez la marque', TRUE) ?>
     <?= form_item('modele', 'Modèle', 'text', 'modele', 'Insérez le modèle', TRUE) ?>
 

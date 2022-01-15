@@ -9,6 +9,20 @@ body, html {
     margin-top: 10px;
 }
 
+
+
+/* Onglet messagerie */
+@media screen and (max-width: 1720px) {
+    .nav .nav-item {
+        width: 100% !important;
+    }
+
+    .nav .nav-item button {
+        width: 100%;
+    }
+}
+
+
 .ongletContact {
     color: #000;
 }
@@ -19,6 +33,12 @@ body, html {
 
 .chat {
     margin-top: 5rem;
+}
+
+@media screen and (max-width: 770px) {
+    .chat {
+        margin-top: unset;
+    }
 }
 
 .card {

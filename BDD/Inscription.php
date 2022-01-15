@@ -79,7 +79,7 @@ class Inscription extends Authentification {
             'nom' => $this->nom,
             'prenom' => $this->prenom,
             'ville' => $this->ville,
-            'mdp' => $this->mdp
+            'mdp' => password_hash($this->mdp,  PASSWORD_DEFAULT, ['cost' => 12])
         ]);
     }
 }

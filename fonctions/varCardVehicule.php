@@ -12,5 +12,17 @@
         <span><?= $km ?> km</span>
         <span><?= $energie ?> | </span>
         <span><?= $transmission ?></span>
+
+        <div class="mt-3">
+            <?php if (isset($provenance) && $provenance === 'mesVehiculesEnVentes' && $connexion === $vendeur): ?>
+                <button class="btn btn-warning" onclick="supprimerVente(<?= $id ?>); return false;"><i class="fas fa-trash"></i> Retirer de mes ventes</button>
+                <button class="btn btn-danger" onclick="supprimerVehicule('<?= $id ?>'); return false;">Supprimer</button>
+            <?php endif ?>
+
+            <?php if (isset($provenance) && $provenance === 'mesVehicules' && $connexion === $vendeur): ?>
+                <button class="btn btn-primary" onclick="revendre('<?= $id ?>'); return false;">Vendre</button>
+                <button class="btn btn-danger" onclick="supprimerVehicule('<?= $id ?>'); return false;">Supprimer</button>
+            <?php endif ?>
+        </div>
     </div>
 </a>

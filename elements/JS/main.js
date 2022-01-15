@@ -92,15 +92,6 @@ function rechercherVehicule()
     )
 }
 
-function showCatDeuxRoues(leType)
-{
-    if ($(leType).val() === 'deuxRoues') {
-        return $('#categorieDeuxRoues').css({display: "block"});
-    } else {
-        return $('#categorieDeuxRoues').css({display: "none"});
-    }
-}
-
 function suggestionsQuestion()
 {
     if ($('#questionFrequentes').css('display') === "none") {
@@ -266,8 +257,8 @@ function demanderAchat(idVehicule)
 
 function actionAchat(idVehicule, idClient, decision)
 {
-    const quest = window.confirm('Voulez vous confirmez cette décision ? Votre conversation avec ce client sera supprimée.');
-    if (quest === true) {
+    const ask = window.confirm('Voulez vous confirmez cette décision ? Votre conversation avec ce client sera supprimée.');
+    if (ask === true) {
         $.ajax
         (
             {
@@ -294,39 +285,13 @@ function actionAchat(idVehicule, idClient, decision)
 
 
 
-function supprimerVente(idVehicule, currentBtn)
+function supprimerVente(idVehicule)
 {
     $.ajax
     (
         {
             method: 'post',
             url: 'ajax/index.php?action=supprimerVente',
-            data: 'idVehicule=' + idVehicule,
-            success: (data) => {
-                const datas = JSON.parse(data);
-                if (datas.erreur) {
-                    $('#messageStatus').modal('show');
-                    $('#messageContentStatus').text(datas.erreur);
-                } else {
-                    $(currentBtn).remove();
-                    $('#messageStatus').modal('show');
-                    $('#messageContentStatus').text("Véhicule supprimé de vos ventes !");
-                }
-            },
-            error: (e) => {
-                console.log("internal error");
-            }
-        }
-    )
-}
-
-function revendre(idVehicule)
-{
-    $.ajax
-    (
-        {
-            method: 'post',
-            url: 'ajax/index.php?action=revendre',
             data: 'idVehicule=' + idVehicule,
             success: (data) => {
                 const datas = JSON.parse(data);
@@ -342,4 +307,58 @@ function revendre(idVehicule)
             }
         }
     )
+}
+
+function revendre(idVehicule)
+{
+    const ask = window.confirm("Une décote de 15% sera appliquée au véhicule, voulez-vous confirmer cette vente ?");
+    if (ask) {
+        $.ajax
+        (
+            {
+                method: 'post',
+                url: 'ajax/index.php?action=revendre',
+                data: 'idVehicule=' + idVehicule,
+                success: (data) => {
+                    const datas = JSON.parse(data);
+                    if (datas.erreur) {
+                        $('#messageStatus').modal('show');
+                        $('#messageContentStatus').text(datas.erreur);
+                    } else {
+                        location.reload();
+                    }
+                },
+                error: (e) => {
+                    console.log("internal error");
+                }
+            }
+        )
+    }
+}
+
+function supprimerVehicule(idVehicule)
+{
+    const ask = window.confirm("Voulez-vous supprimer ce véhicule définitivement ?");
+    if (ask) {
+        $.ajax
+        (
+            {
+                method: 'post',
+                url: 'ajax/index.php?action=supprimerVehicule',
+                data: 'idVehicule=' + idVehicule,
+                success: (data) => {
+                    const datas = JSON.parse(data);
+                    if (datas.erreur) {
+                        $('#messageStatus').modal('show');
+                        $('#messageContentStatus').text(datas.erreur);
+                    } else {
+                        location.reload();
+                    }
+                },
+                error: (e) => {
+                    console.log("internal error");
+                }
+            }
+        )
+    }
 }

@@ -1,0 +1,25 @@
+@media screen and (max-width: 770px) {
+    #profil-onglet {
+        display: block !important;
+    }
+
+    #profil-onglet .nav-link {
+        width: 100%;
+    }
+
+    #profil-onglet .nav-link.active {
+        border: 2px solid #dee2e6 !important;
+    }
+    
+    .leVehicule {
+        flex-direction: column !important;
+    }
+
+    .leVehicule .img-fluid {
+        width: 100%;
+    }
+
+    button {
+        margin-top: 10px;
+    }
+}

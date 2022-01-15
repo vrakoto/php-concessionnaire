@@ -1,0 +1,36 @@
+.leVehicule {
+    margin-top: unset !important;
+}
+
+@media screen and (max-width: 450px) {
+    .type {
+        flex-direction: column;
+        margin-bottom: 40px;
+    }
+
+    .type a {
+        margin-top: 10px;
+    }
+
+    .leVehicule {
+        flex-direction: column !important;
+    }
+
+    .leVehicule .img-fluid {
+        width: 100%;
+    }
+}
+
+@media screen and (max-width: 995px) {
+    .laRecherche {
+        flex-direction: column;
+    }
+
+    .laRecherche .form-select:not(:first-child), .form-control, .laRecherche button {
+        margin-top: 20px;
+    }
+
+    .laRecherche .form-select:not(:first-child), .laRecherche input, .laRecherche button {
+        margin-left: unset;
+    }
+}

@@ -282,6 +282,7 @@ HTML;
         echo json_encode($erreurs);
     break;
 
+
     case 'supprimerVente':
         $erreurs = [];
         $idVehicule = htmlentities($_POST['idVehicule']);
@@ -297,11 +298,27 @@ HTML;
     case 'revendre':
         $erreurs = [];
         $idVehicule = (int)$_POST['idVehicule'];
+        $prixActuel = $pdo->getLeVehicule($idVehicule)['prix'];
+
+        $decote = ($prixActuel * (15 / 100));
+        $nouveauPrix = ($prixActuel - $decote);
 
         try {
-            $pdo->changerStatusVehicule($idVehicule, 'VENTE');
+            $pdo->revendre($idVehicule, $nouveauPrix);
         } catch (\Throwable $th) {
             $erreurs['erreur'] = "Revente impossible" . $e;
+        }
+        echo json_encode($erreurs);
+    break;
+
+    case 'supprimerVehicule':
+        $erreurs = [];
+        $idVehicule = (int)$_POST['idVehicule'];
+        
+        try {
+            $pdo->supprimerVehicule($idVehicule);
+        } catch (\Throwable $th) {
+            $erreurs['erreur'] = "Suppression du véhicule impossible" . $e;
         }
         echo json_encode($erreurs);
     break;
